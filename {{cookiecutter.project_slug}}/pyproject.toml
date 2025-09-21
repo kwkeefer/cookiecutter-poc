@@ -84,6 +84,8 @@ select = [
 ]
 ignore = [
     "E501",  # line too long, handled by formatter
+    "F401",  # unused imports - annoying during development
+    "F841",  # unused variables - annoying during development
 ]
 
 [tool.mypy]

@@ -1,0 +1,18 @@
+{
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "ruff.lint.args": ["--extend-select=I"],
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.typeCheckingMode": "off",
+  "workbench.editorAssociations": {
+    "*.json": "default"
+  },
+  "files.associations": {
+    "keybindings.json": "jsonc"
+  }
+}
