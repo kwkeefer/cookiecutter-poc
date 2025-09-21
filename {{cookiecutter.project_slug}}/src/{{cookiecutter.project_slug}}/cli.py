@@ -25,9 +25,9 @@ def create_parser():
 
     # Server mode
     parser.add_argument(
-        "--no-server",
+        "--server",
         action="store_true",
-        help="Don't start background HTTP server",
+        help="Start HTTP server for callbacks and payloads",
     )
 
     parser.add_argument(
