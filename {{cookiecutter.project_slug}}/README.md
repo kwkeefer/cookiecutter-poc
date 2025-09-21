@@ -20,10 +20,10 @@ uv run {{ cookiecutter.project_slug }} -t http://target.com
 
 ## Writing Your Exploit
 
-Edit `src/{{ cookiecutter.package_name }}/exploit.py`:
+Edit `src/{{ cookiecutter.project_slug }}/exploit.py`:
 
 ```python
-from {{ cookiecutter.package_name }}.utils.output import out
+from {{ cookiecutter.project_slug }}.utils.output import out
 
 def run(args):
     target = args.target.rstrip('/')
@@ -44,7 +44,7 @@ def run(args):
 
 ### Colored Output
 ```python
-from {{ cookiecutter.package_name }}.utils.output import out
+from {{ cookiecutter.project_slug }}.utils.output import out
 
 out.success("Exploited!")
 out.error("Failed")
@@ -54,7 +54,7 @@ out.warning("Slow connection")
 
 ### Encoding/Decoding
 ```python
-from {{ cookiecutter.package_name }}.utils.encoding import base64_encode, url_encode
+from {{ cookiecutter.project_slug }}.utils.encoding import base64_encode, url_encode
 
 payload = base64_encode("admin' OR '1'='1")
 encoded = url_encode("<script>alert(1)</script>")
@@ -62,7 +62,7 @@ encoded = url_encode("<script>alert(1)</script>")
 
 ### Timing Utilities
 ```python
-from {{ cookiecutter.package_name }}.utils.timing import time_ms, identify_timestamp, epoch_range
+from {{ cookiecutter.project_slug }}.utils.timing import time_ms, identify_timestamp, epoch_range
 
 # Generate timestamp
 token = time_ms()
@@ -79,7 +79,7 @@ timestamps = epoch_range('2025-01-01 00:00:00', '2025-01-02 00:00:00')  # Using 
 
 ### Process Execution
 ```python
-from {{ cookiecutter.package_name }}.utils.process import run
+from {{ cookiecutter.project_slug }}.utils.process import run
 
 # Run binary
 stdout, stderr, code = run("./exploit")
@@ -192,8 +192,8 @@ Options:
 
 ## Files
 
-- `src/{{ cookiecutter.package_name }}/exploit.py` - **Main exploit code** (edit this!)
-- `src/{{ cookiecutter.package_name }}/utils/` - Helper utilities
+- `src/{{ cookiecutter.project_slug }}/exploit.py` - **Main exploit code** (edit this!)
+- `src/{{ cookiecutter.project_slug }}/utils/` - Helper utilities
 - `servers/server.py` - HTTP callback server
 - `payloads/` - XSS payloads and webshells
 - `logs/server.ndjson` - Server request logs

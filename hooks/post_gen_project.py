@@ -51,7 +51,7 @@ def main():
     print("\n" + "="*50)
     print("✨ POC template ready!")
     print("="*50)
-    print("\nEdit src/{{ cookiecutter.package_name }}/exploit.py to add your exploit code")
+    print("\nEdit src/{{ cookiecutter.project_slug }}/exploit.py to add your exploit code")
     print("Drop payloads in payloads/ directory")
     print("Check logs in logs/server.ndjson")
     print("\nHappy hacking! 🚀")

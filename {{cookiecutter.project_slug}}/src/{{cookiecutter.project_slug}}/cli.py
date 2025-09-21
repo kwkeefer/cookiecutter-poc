@@ -5,7 +5,7 @@ import argparse
 import sys
 import subprocess
 from pathlib import Path
-from {{ cookiecutter.package_name }} import __version__
+from {{ cookiecutter.project_slug }} import __version__
 
 
 def create_parser():
@@ -93,10 +93,10 @@ def main():
         print(f"[*] Proxy: {args.proxy}")
 
     try:
-        from {{ cookiecutter.package_name }}.exploit import run
+        from {{ cookiecutter.project_slug }}.exploit import run
         run(args)
     except ImportError:
-        print("[!] POC not implemented yet - add your code to src/{{ cookiecutter.package_name }}/exploit.py")
+        print("[!] POC not implemented yet - add your code to src/{{ cookiecutter.project_slug }}/exploit.py")
 
 
 if __name__ == "__main__":

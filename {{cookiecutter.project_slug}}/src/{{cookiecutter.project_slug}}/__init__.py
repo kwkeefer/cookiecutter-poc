@@ -1,6 +1,6 @@
 """{{ cookiecutter.project_name }}
 
-{{ cookiecutter.project_short_description }}
+{{ cookiecutter.poc_description }}
 """
 
 __version__ = "{{ cookiecutter.version }}"
