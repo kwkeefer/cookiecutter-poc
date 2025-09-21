@@ -8,6 +8,8 @@ import threading
 import time
 from pathlib import Path
 from {{ cookiecutter.project_slug }} import __version__
+from {{ cookiecutter.project_slug }}.utils.network import get_interfaces, get_callback_host
+from {{ cookiecutter.project_slug }}.utils.output import out
 
 
 def create_parser():
@@ -52,6 +54,20 @@ def create_parser():
     )
 
     parser.add_argument(
+        "--lhost",
+        type=str,
+        default=None,
+        help="Local host address for callbacks (defaults to tun0 if available)",
+    )
+
+    parser.add_argument(
+        "--lport",
+        type=str,
+        default=None,
+        help="Local port for callbacks (defaults to --port value)",
+    )
+
+    parser.add_argument(
         "--threads",
         type=int,
         default=1,
@@ -73,29 +89,42 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
 
+    # Handle callback host/port defaults
+    if args.lport is None:
+        args.lport = str(args.port)
+        out.warning(f"--lport not set, defaulting to --port value: {args.lport}")
+
+    if args.lhost is None:
+        args.lhost = get_callback_host()
+        interfaces = get_interfaces()
+        if 'tun0' in interfaces:
+            out.warning(f"--lhost not set, defaulting to tun0 interface: {args.lhost}")
+        else:
+            out.warning(f"--lhost not set, defaulting to first available interface: {args.lhost}")
+
     if args.server:
         # Start the HTTP server
-        print(f"[*] Starting server on port {args.port}...")
+        out.info(f"Starting server on port {args.port}...")
         try:
             from {{ cookiecutter.project_slug }}.servers import server
             server_args = argparse.Namespace(port=args.port, bind='0.0.0.0')
             server.main_with_args(server_args)
         except KeyboardInterrupt:
-            print("\n[*] Server stopped")
+            out.info("Server stopped")
         sys.exit(0)
 
     # Run exploit
-    print(f"[*] {{ cookiecutter.project_name }} - {{ cookiecutter.poc_description }}")
-    print(f"[*] Target: {args.target}")
+    out.info(f"{{ cookiecutter.project_name }} - {{ cookiecutter.poc_description }}")
+    out.info(f"Target: {args.target}")
 
     if args.proxy:
-        print(f"[*] Proxy: {args.proxy}")
+        out.info(f"Proxy: {args.proxy}")
 
     try:
         from {{ cookiecutter.project_slug }}.exploit import run
         run(args)
     except ImportError:
-        print("[!] POC not implemented yet - add your code to src/{{ cookiecutter.project_slug }}/exploit.py")
+        out.warning("POC not implemented yet - add your code to src/{{ cookiecutter.project_slug }}/exploit.py")
 
 
 if __name__ == "__main__":

@@ -32,3 +32,20 @@ def get_local_ip(exclude_loopback=True):
             return ip
 
     return '127.0.0.1'
+
+
+def get_callback_host():
+    """Get the best callback host address (prefer tun0)."""
+    interfaces = get_interfaces()
+
+    # Prefer tun0 if available (VPN connection)
+    if 'tun0' in interfaces:
+        return interfaces['tun0']
+
+    # Otherwise, find first non-loopback interface
+    for iface, ip in interfaces.items():
+        if not ip.startswith('127.') and iface != 'lo':
+            return ip
+
+    # Fallback to localhost
+    return '127.0.0.1'
