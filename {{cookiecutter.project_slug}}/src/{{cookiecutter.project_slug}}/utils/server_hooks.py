@@ -1,117 +1,86 @@
 """
-Simple utilities for interacting with the server's event queue.
-Use this from your exploit to monitor/process incoming data.
+Simple utilities for interacting with the http server's event queue.
+Use this from your exploit to get cookies and other events.
 """
 
-import json
+import requests
 import time
-from pathlib import Path
 
 
-def watch_events(callback, event_file=None):
+def get_event(server='http://localhost:8000', timeout=30, wait=False):
     """
-    Watch for new events from the server and call callback for each.
+    Pop next event from the server queue.
 
-    Example:
-        def handle_cookie(event):
-            if event['type'] == 'cookie':
-                print(f"Got cookie: {event['data']}")
-                # Do something with the cookie...
-
-        # Start watching in background
-        import threading
-        threading.Thread(target=watch_events, args=(handle_cookie,), daemon=True).start()
-
-        # Or call directly (blocks)
-        # watch_events(handle_cookie)
+    Returns the event dict or None if timeout/empty.
+    If wait=True, will poll until event arrives or timeout.
     """
-    if event_file is None:
-        event_file = Path(__file__).parent.parent.parent.parent / 'logs' / 'events.ndjson'
-
-    # Track position in file
-    last_pos = 0
+    start_time = time.time()
 
     while True:
         try:
-            if event_file.exists():
-                with open(event_file, 'r') as f:
-                    f.seek(last_pos)
-                    for line in f:
-                        if line.strip():
-                            try:
-                                event = json.loads(line)
-                                callback(event)
-                            except json.JSONDecodeError:
-                                pass
-                    last_pos = f.tell()
-        except Exception as e:
-            print(f"Error watching events: {e}")
+            r = requests.delete(f'{server}/queue', timeout=2)
+            if r.status_code == 200:
+                return r.json()
+            elif r.status_code == 204 and not wait:
+                return None
+            # If 204 and wait=True, continue polling
+        except (requests.Timeout, requests.ConnectionError):
+            if not wait:
+                return None
+            # If wait=True, continue trying
 
-        time.sleep(0.5)  # Check twice per second
+        # Check if we've exceeded timeout
+        if time.time() - start_time >= timeout:
+            return None
+
+        # Small delay before retrying
+        if wait:
+            time.sleep(0.5)
 
 
-def get_latest_cookie():
+def get_cookie(server='http://localhost:8000', timeout=30):
     """
-    Quick helper to get the most recent cookie from events.
-    Returns None if no cookies found.
+    Pop next cookie from server queue.
+
+    Returns just the cookie data string or None if timeout/no cookie.
+    Will wait up to timeout seconds for a cookie to arrive.
     """
-    event_file = Path(__file__).parent.parent.parent.parent / 'logs' / 'events.ndjson'
-
-    if not event_file.exists():
-        return None
-
-    cookie = None
-    with open(event_file, 'r') as f:
-        for line in f:
-            if line.strip():
-                try:
-                    event = json.loads(line)
-                    if event.get('type') == 'cookie':
-                        cookie = event.get('data')
-                except:
-                    pass
-
-    return cookie
+    event = get_event(server, timeout, wait=True)
+    if event and event.get('type') == 'cookie':
+        return event.get('data')
+    return None
 
 
-def wait_for_callback(timeout=30, param='cookie'):
+def wait_for_callback(server='http://localhost:8000', timeout=30, param='cookie'):
     """
-    Wait for a specific callback parameter to arrive.
-    Returns the data or None if timeout.
+    Wait for a specific callback type to arrive.
 
     Example:
         # Send XSS payload
         send_payload(xss)
 
         # Wait for cookie to arrive
-        cookie = wait_for_callback(timeout=10, param='cookie')
+        cookie = wait_for_callback(timeout=10)
         if cookie:
             print(f"Got cookie: {cookie}")
     """
-    event_file = Path(__file__).parent.parent.parent.parent / 'logs' / 'events.ndjson'
     start_time = time.time()
-    last_pos = 0
-
-    # Get initial position
-    if event_file.exists():
-        with open(event_file, 'r') as f:
-            f.seek(0, 2)  # Go to end
-            last_pos = f.tell()
 
     while time.time() - start_time < timeout:
-        if event_file.exists():
-            with open(event_file, 'r') as f:
-                f.seek(last_pos)
-                for line in f:
-                    if line.strip():
-                        try:
-                            event = json.loads(line)
-                            if event.get('type') == param:
-                                return event.get('data')
-                        except:
-                            pass
-                last_pos = f.tell()
-
-        time.sleep(0.2)
+        event = get_event(server, timeout=2, wait=False)  # Don't wait on each call
+        if event and event.get('type') == param:
+            return event.get('data')
+        time.sleep(0.5)
 
     return None
+
+
+def drain_queue(server='http://localhost:8000'):
+    """
+    Clear all pending events from the queue.
+    Useful for starting fresh before a new exploit attempt.
+    """
+    count = 0
+    while get_event(server, timeout=1, wait=False):
+        count += 1
+    return count

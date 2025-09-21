@@ -89,19 +89,6 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
 
-    # Handle callback host/port defaults
-    if args.lport is None:
-        args.lport = str(args.port)
-        out.warning(f"--lport not set, defaulting to --port value: {args.lport}")
-
-    if args.lhost is None:
-        args.lhost = get_callback_host()
-        interfaces = get_interfaces()
-        if 'tun0' in interfaces:
-            out.warning(f"--lhost not set, defaulting to tun0 interface: {args.lhost}")
-        else:
-            out.warning(f"--lhost not set, defaulting to first available interface: {args.lhost}")
-
     if args.server:
         # Start the HTTP server
         out.info(f"Starting server on port {args.port}...")
@@ -112,6 +99,20 @@ def main():
         except KeyboardInterrupt:
             out.info("Server stopped")
         sys.exit(0)
+    else:
+        # Handle callback host/port defaults
+        if args.lport is None:
+            args.lport = str(args.port)
+            out.warning(f"--lport not set, defaulting to --port value: {args.lport}")
+
+        if args.lhost is None:
+            args.lhost = get_callback_host()
+            interfaces = get_interfaces()
+            if 'tun0' in interfaces:
+                out.warning(f"--lhost not set, defaulting to tun0 interface: {args.lhost}")
+            else:
+                out.warning(f"--lhost not set, defaulting to first available interface: {args.lhost}")
+
 
     # Run exploit
     out.info(f"{{ cookiecutter.project_name }} - {{ cookiecutter.poc_description }}")

@@ -9,35 +9,22 @@ import logging
 from datetime import datetime
 import json
 import base64
-from pathlib import Path
-import argparse
 from urllib.parse import parse_qs, urlparse
 import os
 from queue import Queue
-import threading
 from {{cookiecutter.project_slug}}.utils.network import get_interfaces
+from {{cookiecutter.project_slug}}.utils.output import out
+from {{cookiecutter.project_slug}}.utils.paths import LOGS_DIR, PAYLOADS_DIR, ensure_dirs_exist, get_log_file
 
-# Setup paths
-BASE_DIR = Path(__file__).parent.parent.parent.parent  # Go up to project root
-LOGS_DIR = BASE_DIR / "logs"
-PAYLOADS_DIR = BASE_DIR / "payloads"
+# Ensure directories exist
+ensure_dirs_exist()
 
-# Create logs directory
-LOGS_DIR.mkdir(exist_ok=True)
-
-# Setup logger
+# Setup logger (only used for internal errors if any)
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger('server')
 
-# File logger for NDJSON
-file_handler = logging.FileHandler(LOGS_DIR / 'server.ndjson')
-file_handler.setFormatter(logging.Formatter('%(message)s'))
-
 # Global queue for interesting events
 event_queue = Queue()
-
-# Hook functions that process specific data
-hooks = {}
 
 
 class POCHTTPHandler(SimpleHTTPRequestHandler):
@@ -79,6 +66,22 @@ class POCHTTPHandler(SimpleHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Headers', '*')
         self.end_headers()
 
+    def do_DELETE(self):
+        """DELETE /queue - get next item from queue"""
+        if self.path == '/queue':
+            try:
+                event = event_queue.get(timeout=1.0)
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps(event).encode())
+            except:
+                self.send_response(204)  # No content
+                self.end_headers()
+        else:
+            self.send_response(404)
+            self.end_headers()
+
     def handle_request(self):
         """Log request details"""
         parsed = urlparse(self.path)
@@ -102,30 +105,26 @@ class POCHTTPHandler(SimpleHTTPRequestHandler):
         }
 
         # Log to file
-        with open(LOGS_DIR / 'server.ndjson', 'a') as f:
+        with open(get_log_file('server.ndjson'), 'a') as f:
             f.write(json.dumps(log_entry) + '\n')
 
         # Console output (minimal)
-        print(f"[{datetime.now().strftime('%H:%M:%S')}] {self.command} {self.path} from {self.client_address[0]}")
+        out.info(f"[{datetime.now().strftime('%H:%M:%S')}] {self.command} {self.path} from {self.client_address[0]}")
         if parsed.query:
-            print(f"  Query: {parsed.query}")
+            out.debug(f"Query: {parsed.query}")
         if body:
-            print(f"  Body: {body.decode('utf-8', errors='replace')[:100]}")
+            out.debug(f"Body: {body.decode('utf-8', errors='replace')[:100]}")
 
-        # Check for interesting parameters and trigger hooks
+        # Check for interesting parameters and add to queue
         if 'cookie' in query_params:
             cookie_data = query_params['cookie'][0] if query_params['cookie'] else ''
             try:
                 decoded_cookie = base64.b64decode(cookie_data).decode('utf-8', errors='replace')
-                print(f"  🍪 COOKIE CAPTURED: {decoded_cookie}")
-                event_queue.put({'type': 'cookie', 'data': decoded_cookie, 'raw': cookie_data})
-
-                # Call hook if registered
-                if 'cookie' in hooks:
-                    hooks['cookie'](decoded_cookie)
+                out.success(f"🍪 COOKIE CAPTURED: {decoded_cookie}")
+                event_queue.put({'type': 'cookie', 'data': decoded_cookie, 'raw': cookie_data, 'timestamp': datetime.now().isoformat()})
             except:
-                print(f"  🍪 COOKIE (raw): {cookie_data}")
-                event_queue.put({'type': 'cookie', 'data': cookie_data, 'raw': cookie_data})
+                out.success(f"🍪 COOKIE (raw): {cookie_data}")
+                event_queue.put({'type': 'cookie', 'data': cookie_data, 'raw': cookie_data, 'timestamp': datetime.now().isoformat()})
 
     def log_message(self, format, *args):
         # Suppress default logging
@@ -137,86 +136,17 @@ class POCHTTPHandler(SimpleHTTPRequestHandler):
         super().end_headers()
 
 
-def monitor_queue():
-    """Background thread to monitor event queue"""
-    while True:
-        event = event_queue.get()
-        # You can add custom processing here
-        # For now, just save interesting events to a separate file
-        with open(LOGS_DIR / 'events.ndjson', 'a') as f:
-            f.write(json.dumps({**event, 'timestamp': datetime.now().isoformat()}) + '\n')
-
-
-def register_hook(event_type, func):
-    """Register a function to be called when an event type is received"""
-    hooks[event_type] = func
-
-
-def main():
-    parser = argparse.ArgumentParser(description='POC HTTP Server')
-    parser.add_argument('-p', '--port', type=int, default=8000, help='Port (default: 8000)')
-    parser.add_argument('-b', '--bind', default='0.0.0.0', help='Bind address (default: 0.0.0.0)')
-    args = parser.parse_args()
-
-    os.chdir(PAYLOADS_DIR)  # Serve from payloads directory
-
-    # Start monitoring thread
-    monitor_thread = threading.Thread(target=monitor_queue, daemon=True)
-    monitor_thread.start()
-
-    # Example: Register a custom hook for cookies
-    # register_hook('cookie', lambda data: print(f"[HOOK] Processing cookie: {data}"))
-
-    # Get all network interfaces
-    interfaces = get_interfaces()
-
-    print(f"\n{'='*50}")
-    print("POC Server listening on:")
-
-    # Priority order for interfaces to highlight
-    priority_interfaces = ['tun0', 'eth0', 'wlan0', 'ens33']
-
-    # Show priority interfaces first
-    for iface in priority_interfaces:
-        if iface in interfaces:
-            print(f"  → http://{interfaces[iface]}:{args.port} ({iface})")
-
-    # Show remaining interfaces
-    for iface, ip in interfaces.items():
-        if iface not in priority_interfaces and not ip.startswith('127.'):
-            print(f"  → http://{ip}:{args.port} ({iface})")
-
-    # Always show localhost last
-    if args.bind == '0.0.0.0':
-        print(f"  → http://127.0.0.1:{args.port} (localhost)")
-
-    print(f"\nServing: {PAYLOADS_DIR}")
-    print(f"Logs: {LOGS_DIR}/server.ndjson")
-    print(f"Events: {LOGS_DIR}/events.ndjson")
-    print(f"{'='*50}\n")
-
-    server = HTTPServer((args.bind, args.port), POCHTTPHandler)
-
-    try:
-        server.serve_forever()
-    except KeyboardInterrupt:
-        print("\nShutting down...")
-        server.shutdown()
-
-
 def main_with_args(args):
-    """Main entry point that accepts args directly (for CLI integration)"""
-    os.chdir(PAYLOADS_DIR)  # Serve from payloads directory
+    """Main entry point called from CLI"""
+    os.chdir(str(PAYLOADS_DIR))  # Serve from payloads directory
 
-    # Start monitoring thread
-    monitor_thread = threading.Thread(target=monitor_queue, daemon=True)
-    monitor_thread.start()
+    # Queue is now accessed via HTTP DELETE /queue endpoint
 
     # Get all network interfaces
     interfaces = get_interfaces()
 
-    print(f"\n{'='*50}")
-    print("POC Server listening on:")
+    out.raw(f"\n{'='*50}")
+    out.info("POC Server listening on:")
 
     # Priority order for interfaces to highlight
     priority_interfaces = ['tun0', 'eth0', 'wlan0', 'ens33']
@@ -224,30 +154,29 @@ def main_with_args(args):
     # Show priority interfaces first
     for iface in priority_interfaces:
         if iface in interfaces:
-            print(f"  → http://{interfaces[iface]}:{args.port} ({iface})")
+            out.success(f"→ http://{interfaces[iface]}:{args.port} ({iface})")
 
     # Show remaining interfaces
     for iface, ip in interfaces.items():
         if iface not in priority_interfaces and not ip.startswith('127.'):
-            print(f"  → http://{ip}:{args.port} ({iface})")
+            out.status(f"→ http://{ip}:{args.port} ({iface})")
 
     # Always show localhost last
     if args.bind == '0.0.0.0':
-        print(f"  → http://127.0.0.1:{args.port} (localhost)")
+        out.status(f"→ http://127.0.0.1:{args.port} (localhost)")
 
-    print(f"\nServing: {PAYLOADS_DIR}")
-    print(f"Logs: {LOGS_DIR}/server.ndjson")
-    print(f"Events: {LOGS_DIR}/events.ndjson")
-    print(f"{'='*50}\n")
+    out.raw(f"\nServing: {PAYLOADS_DIR}")
+    out.raw(f"Logs: {LOGS_DIR}/server.ndjson")
+    out.raw("Queue: DELETE /queue to pop events")
+    out.raw(f"{'='*50}\n")
 
     server = HTTPServer((args.bind, args.port), POCHTTPHandler)
 
     try:
         server.serve_forever()
     except KeyboardInterrupt:
-        print("\nShutting down...")
+        out.warning("\nShutting down...")
         server.shutdown()
 
 
-if __name__ == '__main__':
-    main()
+# This server is meant to be called via cli.py, not run directly
