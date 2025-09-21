@@ -29,15 +29,23 @@ def epoch_range(start_date, end_date, step_minutes=1):
     """Generate range of epoch timestamps between two dates
 
     Args:
-        start_date: String like '2024-01-01 00:00:00'
-        end_date: String like '2024-01-01 23:59:59'
+        start_date: String like '2024-01-01 00:00:00' or epoch timestamp (int/float)
+        end_date: String like '2024-01-01 23:59:59' or epoch timestamp (int/float)
         step_minutes: Minutes between each timestamp
 
     Returns:
         List of epoch timestamps
     """
-    start = datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S')
-    end = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
+    # Handle epoch timestamps directly
+    if isinstance(start_date, (int, float)):
+        start = datetime.fromtimestamp(start_date)
+    else:
+        start = datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S')
+
+    if isinstance(end_date, (int, float)):
+        end = datetime.fromtimestamp(end_date)
+    else:
+        end = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
 
     timestamps = []
     current = start

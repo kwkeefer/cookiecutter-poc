@@ -62,7 +62,7 @@ encoded = url_encode("<script>alert(1)</script>")
 
 ### Timing Utilities
 ```python
-from {{ cookiecutter.package_name }}.utils.timing import time_ms, identify_timestamp
+from {{ cookiecutter.package_name }}.utils.timing import time_ms, identify_timestamp, epoch_range
 
 # Generate timestamp
 token = time_ms()
@@ -71,6 +71,10 @@ token = time_ms()
 info = identify_timestamp("1735689600000")
 print(info['type'])  # epoch_milliseconds
 print(info['date'])  # 2025-01-01 00:00:00
+
+# Generate epoch range - now accepts epoch timestamps directly!
+timestamps = epoch_range(1735689600, 1735776000, step_minutes=60)  # Using epoch
+timestamps = epoch_range('2025-01-01 00:00:00', '2025-01-02 00:00:00')  # Using strings
 ```
 
 ### Process Execution
