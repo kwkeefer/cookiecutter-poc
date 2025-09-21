@@ -15,9 +15,10 @@ from urllib.parse import parse_qs, urlparse
 import os
 from queue import Queue
 import threading
+from {{cookiecutter.project_slug}}.utils.network import get_interfaces
 
 # Setup paths
-BASE_DIR = Path(__file__).parent.parent
+BASE_DIR = Path(__file__).parent.parent.parent.parent  # Go up to project root
 LOGS_DIR = BASE_DIR / "logs"
 PAYLOADS_DIR = BASE_DIR / "payloads"
 
@@ -166,10 +167,78 @@ def main():
     # Example: Register a custom hook for cookies
     # register_hook('cookie', lambda data: print(f"[HOOK] Processing cookie: {data}"))
 
-    print(f"\nPOC Server: http://{args.bind}:{args.port}")
-    print(f"Serving: {PAYLOADS_DIR}")
+    # Get all network interfaces
+    interfaces = get_interfaces()
+
+    print(f"\n{'='*50}")
+    print("POC Server listening on:")
+
+    # Priority order for interfaces to highlight
+    priority_interfaces = ['tun0', 'eth0', 'wlan0', 'ens33']
+
+    # Show priority interfaces first
+    for iface in priority_interfaces:
+        if iface in interfaces:
+            print(f"  → http://{interfaces[iface]}:{args.port} ({iface})")
+
+    # Show remaining interfaces
+    for iface, ip in interfaces.items():
+        if iface not in priority_interfaces and not ip.startswith('127.'):
+            print(f"  → http://{ip}:{args.port} ({iface})")
+
+    # Always show localhost last
+    if args.bind == '0.0.0.0':
+        print(f"  → http://127.0.0.1:{args.port} (localhost)")
+
+    print(f"\nServing: {PAYLOADS_DIR}")
     print(f"Logs: {LOGS_DIR}/server.ndjson")
-    print(f"Events: {LOGS_DIR}/events.ndjson\n")
+    print(f"Events: {LOGS_DIR}/events.ndjson")
+    print(f"{'='*50}\n")
+
+    server = HTTPServer((args.bind, args.port), POCHTTPHandler)
+
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("\nShutting down...")
+        server.shutdown()
+
+
+def main_with_args(args):
+    """Main entry point that accepts args directly (for CLI integration)"""
+    os.chdir(PAYLOADS_DIR)  # Serve from payloads directory
+
+    # Start monitoring thread
+    monitor_thread = threading.Thread(target=monitor_queue, daemon=True)
+    monitor_thread.start()
+
+    # Get all network interfaces
+    interfaces = get_interfaces()
+
+    print(f"\n{'='*50}")
+    print("POC Server listening on:")
+
+    # Priority order for interfaces to highlight
+    priority_interfaces = ['tun0', 'eth0', 'wlan0', 'ens33']
+
+    # Show priority interfaces first
+    for iface in priority_interfaces:
+        if iface in interfaces:
+            print(f"  → http://{interfaces[iface]}:{args.port} ({iface})")
+
+    # Show remaining interfaces
+    for iface, ip in interfaces.items():
+        if iface not in priority_interfaces and not ip.startswith('127.'):
+            print(f"  → http://{ip}:{args.port} ({iface})")
+
+    # Always show localhost last
+    if args.bind == '0.0.0.0':
+        print(f"  → http://127.0.0.1:{args.port} (localhost)")
+
+    print(f"\nServing: {PAYLOADS_DIR}")
+    print(f"Logs: {LOGS_DIR}/server.ndjson")
+    print(f"Events: {LOGS_DIR}/events.ndjson")
+    print(f"{'='*50}\n")
 
     server = HTTPServer((args.bind, args.port), POCHTTPHandler)
 

@@ -4,6 +4,8 @@
 import argparse
 import sys
 import subprocess
+import threading
+import time
 from pathlib import Path
 from {{ cookiecutter.project_slug }} import __version__
 
@@ -23,9 +25,9 @@ def create_parser():
 
     # Server mode
     parser.add_argument(
-        "--server",
+        "--no-server",
         action="store_true",
-        help="Start HTTP server for callbacks and payloads",
+        help="Don't start background HTTP server",
     )
 
     parser.add_argument(
@@ -73,14 +75,11 @@ def main():
 
     if args.server:
         # Start the HTTP server
-        server_path = Path(__file__).parent.parent.parent / "servers" / "server.py"
-        if not server_path.exists():
-            print(f"[!] Server not found at {server_path}")
-            sys.exit(1)
-
         print(f"[*] Starting server on port {args.port}...")
         try:
-            subprocess.run([sys.executable, str(server_path), "-p", str(args.port)])
+            from {{ cookiecutter.project_slug }}.servers import server
+            server_args = argparse.Namespace(port=args.port, bind='0.0.0.0')
+            server.main_with_args(server_args)
         except KeyboardInterrupt:
             print("\n[*] Server stopped")
         sys.exit(0)
