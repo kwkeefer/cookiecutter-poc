@@ -6,7 +6,6 @@ Use this from your exploit to monitor/process incoming data.
 import json
 import time
 from pathlib import Path
-import threading
 
 
 def watch_events(callback, event_file=None):
@@ -20,7 +19,11 @@ def watch_events(callback, event_file=None):
                 # Do something with the cookie...
 
         # Start watching in background
+        import threading
         threading.Thread(target=watch_events, args=(handle_cookie,), daemon=True).start()
+
+        # Or call directly (blocks)
+        # watch_events(handle_cookie)
     """
     if event_file is None:
         event_file = Path(__file__).parent.parent.parent.parent / 'logs' / 'events.ndjson'
