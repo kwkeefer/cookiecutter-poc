@@ -274,8 +274,7 @@ quick_catch(4444, trigger_func=trigger)
 1. **Always use colored output** - Makes exploits much easier to debug
 2. **Use shell_catcher** instead of netcat - Get PTY upgrade automatically
 3. **Generate shells on-demand** - Don't hardcode LHOST/LPORT
-4. **Check CLAUDE.md** for more examples and patterns
-5. **Keep it simple** - These utils prioritize speed over perfection
+4. **Keep it simple** - These utils prioritize speed over perfection
 
 ## 🏃 Quick Start Checklist
 
