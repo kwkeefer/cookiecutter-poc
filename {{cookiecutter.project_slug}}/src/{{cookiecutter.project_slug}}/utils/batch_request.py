@@ -1,9 +1,11 @@
 """Batch request utility for sending multiple HTTP requests with different parameters."""
 
-import httpx
 import asyncio
-from typing import Iterator, Callable, Any, Optional, List, Dict, Union
 from dataclasses import dataclass
+from typing import Any, Callable, Dict, Iterator, List, Optional, Union
+
+import httpx
+from httpx import Proxy
 
 try:
     from .output import out
@@ -11,20 +13,27 @@ except ImportError:
     # Fallback if output module not available
     class out:
         @staticmethod
-        def success(msg): print(f"[+] {msg}")
+        def success(msg):
+            print(f"[+] {msg}")
+
         @staticmethod
-        def error(msg): print(f"[-] {msg}")
+        def error(msg):
+            print(f"[-] {msg}")
+
         @staticmethod
-        def info(msg): print(f"[*] {msg}")
+        def info(msg):
+            print(f"[*] {msg}")
 
 
 @dataclass
 class BatchResult:
     """Result from a single request in the batch."""
+
     payload: Dict[str, Any]
     response: Optional[httpx.Response]
     matched: bool
     error: Optional[Exception] = None
+    cookies: Optional[Dict[str, str]] = None
 
 
 async def batch_request(
@@ -37,7 +46,8 @@ async def batch_request(
     proxy: Optional[str] = None,
     filter_matched: bool = False,
     drop_response: bool = False,
-    **client_kwargs
+    stop_on_match: bool = False,
+    **client_kwargs,
 ) -> List[BatchResult]:
     """
     Send multiple HTTP requests using a base request as template.
@@ -52,6 +62,7 @@ async def batch_request(
         proxy: HTTP proxy URL (e.g., "http://127.0.0.1:8080")
         filter_matched: Only return results where validate() is True (default: False)
         drop_response: Don't store response object to save memory (default: False)
+        stop_on_match: Stop sending requests after first match (default: False)
         **client_kwargs: Additional kwargs for httpx.AsyncClient
 
     Returns:
@@ -82,48 +93,69 @@ async def batch_request(
     """
     semaphore = asyncio.Semaphore(concurrency)
     results = []
+    cancel_event = asyncio.Event()
 
-    async def send_request(client: httpx.AsyncClient, payload: Dict[str, Any]) -> BatchResult:
+    async def send_request(payload: Dict[str, Any], client_kwargs: Dict) -> Optional[BatchResult]:
+        # Check if we should cancel before starting
+        if cancel_event.is_set():
+            return None
+
         async with semaphore:
             try:
-                # Build new request from base, overriding with payload
-                # Remove Content-Length if we're changing the body
-                headers = dict(base_request.headers)
-                if "json" in payload or "data" in payload or "content" in payload:
-                    headers.pop("Content-Length", None)
-                    # Only set Content-Type if not explicitly provided in payload headers
-                    payload_headers = payload.get("headers", {})
-                    if "Content-Type" not in payload_headers:
-                        if "json" in payload:
-                            headers["Content-Type"] = "application/json"
-                        elif "data" in payload:
-                            headers["Content-Type"] = "application/x-www-form-urlencoded"
-                # Payload headers override everything
-                headers.update(payload.get("headers", {}))
+                # Check again after acquiring semaphore
+                if cancel_event.is_set():
+                    return None
 
-                request = client.build_request(
-                    method=payload.get("method", base_request.method),
-                    url=payload.get("url", base_request.url),
-                    params=payload.get("params"),
-                    headers=headers,
-                    cookies=payload.get("cookies"),
-                    json=payload.get("json"),
-                    data=payload.get("data"),
-                    content=payload.get("content", base_request.content if not payload.get("json") and not payload.get("data") else None),
-                )
+                # Create a new client for each request to isolate cookies
+                async with httpx.AsyncClient(**client_kwargs) as client:
+                    # Build new request from base, overriding with payload
+                    # Remove Content-Length if we're changing the body
+                    headers = dict(base_request.headers)
+                    if "json" in payload or "data" in payload or "content" in payload:
+                        headers.pop("Content-Length", None)
+                        # Only set Content-Type if not explicitly provided in payload headers
+                        payload_headers = payload.get("headers", {})
+                        if "Content-Type" not in payload_headers:
+                            if "json" in payload:
+                                headers["Content-Type"] = "application/json"
+                            elif "data" in payload:
+                                headers["Content-Type"] = "application/x-www-form-urlencoded"
+                    # Payload headers override everything
+                    headers.update(payload.get("headers", {}))
 
-                response = await client.send(request)
-                matched = validate(response)
+                    request = client.build_request(
+                        method=payload.get("method", base_request.method),
+                        url=payload.get("url", base_request.url),
+                        params=payload.get("params"),
+                        headers=headers,
+                        cookies=payload.get("cookies"),
+                        json=payload.get("json"),
+                        data=payload.get("data"),
+                        content=payload.get(
+                            "content", base_request.content if not payload.get("json") and not payload.get("data") else None
+                        ),
+                    )
 
-                if matched and show_progress:
-                    payload_str = _format_payload(payload)
-                    out.success(f"Match found: {payload_str}")
+                    response = await client.send(request)
+                    matched = validate(response)
 
-                # Drop response body if requested (saves memory)
-                if drop_response:
-                    response = None
+                    # Capture cookies from client as dict (includes session cookies)
+                    cookies = dict(client.cookies)
 
-                return BatchResult(payload, response, matched)
+                    if matched:
+                        if show_progress:
+                            payload_str = _format_payload(payload)
+                            out.success(f"Match found: {payload_str}")
+
+                        # Set cancel event if stop_on_match is enabled
+                        if stop_on_match:
+                            cancel_event.set()
+
+                    # Drop response body if requested (saves memory)
+                    if drop_response:
+                        response = None
+
+                    return BatchResult(payload, response, matched, cookies=cookies)
             except Exception as e:
                 if show_progress:
                     out.error(f"Request failed: {str(e)[:100]}")
@@ -135,14 +167,17 @@ async def batch_request(
 
     # Configure proxy if provided (only if not already in client_kwargs)
     if proxy and "proxies" not in client_kwargs:
-        client_kwargs["proxies"] = {
-            "http://": proxy,
-            "https://": proxy
-        }
+        client_kwargs["proxy"] = Proxy(url=proxy)
 
-    async with httpx.AsyncClient(timeout=timeout, **client_kwargs) as client:
-        tasks = [send_request(client, payload) for payload in payloads]
-        results = await asyncio.gather(*tasks)
+    # Add timeout to client kwargs
+    client_kwargs["timeout"] = timeout
+
+    # Create tasks with client kwargs
+    tasks = [send_request(payload, client_kwargs) for payload in payloads]
+    results = await asyncio.gather(*tasks)
+
+    # Filter out None results (cancelled tasks)
+    results = [r for r in results if r is not None]
 
     # Filter to only matched results if requested
     if filter_matched:
@@ -151,13 +186,11 @@ async def batch_request(
     return results
 
 
-
-
 def batch_request_sync(
     base_request: httpx.Request,
     payloads: Iterator[Dict[str, Any]],
     validate: Callable[[httpx.Response], bool],
-    **kwargs
+    **kwargs,
 ) -> List[BatchResult]:
     """
     Synchronous wrapper for batch_request.
@@ -178,6 +211,7 @@ def batch_request_sync(
         )
     """
     import asyncio
+
     return asyncio.run(batch_request(base_request, payloads, validate, **kwargs))
 
 
@@ -197,6 +231,7 @@ def _format_payload(payload: Dict[str, Any]) -> str:
 
 
 # Helper functions to generate common payload patterns
+
 
 def generate_param_payloads(name: str, values: List[Any], base_params: Optional[Dict] = None) -> List[Dict]:
     """
@@ -310,6 +345,7 @@ def generate_multi_payloads(payloads_dict: Dict[str, List[Any]], base_kwargs: Op
         })
     """
     from itertools import product
+
     base_kwargs = base_kwargs or {}
 
     # Get all combinations

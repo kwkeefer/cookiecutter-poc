@@ -191,6 +191,47 @@ if duration > 5:
     out.success("Vulnerable to time-based SQLi!")
 ```
 
+## HTML Parser (`utils/html_parser.py`)
+
+Easy BeautifulSoup wrapper for quick HTML parsing:
+
+```python
+from utils.html_parser import HTMLParser, quick_parse, parse_response
+
+# Parse from response
+parser = HTMLParser.from_response(response)
+
+# Find elements
+form = parser.find_by_id("login-form")
+inputs = parser.find_all_by_class("form-input")
+links = parser.find_links()
+
+# CSRF token extraction
+csrf = parser.find_csrf_token()  # Auto-finds common CSRF token names
+all_tokens = parser.find_all_csrf_tokens()  # Get all potential tokens
+
+# Form handling
+forms = parser.find_forms()
+for form in forms:
+    data = parser.extract_form_data(form)  # Extract all inputs as dict
+    print(f"Action: {form.get('action')}, Data: {data}")
+
+# Quick dumps
+parser.dump_forms()  # Print all forms with their data
+parser.dump_links()  # Print all links
+
+# CSS selectors
+hidden = parser.css_select("input[type='hidden']")
+button = parser.css_select_one("#submit-btn")
+
+# Text search
+results = parser.search("admin", tag="div")  # Find text in specific tags
+
+# Quick usage
+parser = quick_parse(html_string)
+csrf = parser.find_csrf_token()
+```
+
 ## Common POC Patterns
 
 ### XSS Cookie Stealer

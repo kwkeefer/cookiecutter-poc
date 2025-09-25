@@ -22,7 +22,8 @@ dependencies = [
     "urllib3>=2.0.0",
     "colorama>=0.4.6",
     "netifaces>=0.11.0",
-    "httpx>=0.28.1"
+    "httpx>=0.28.1",
+    "beautifulsoup4>=4.13.5"
 ]
 
 [project.optional-dependencies]
