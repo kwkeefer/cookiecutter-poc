@@ -40,12 +40,12 @@ def epoch_range(start_date, end_date, step_minutes=1):
     if isinstance(start_date, (int, float)):
         start = datetime.fromtimestamp(start_date)
     else:
-        start = datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S')
+        start = datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
 
     if isinstance(end_date, (int, float)):
         end = datetime.fromtimestamp(end_date)
     else:
-        end = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
+        end = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
 
     timestamps = []
     current = start
@@ -79,9 +79,10 @@ def time_based_check(func, threshold=5.0, *args, **kwargs):
     """Check if function takes longer than threshold seconds
 
     Useful for blind time-based SQLi/XXE detection
+    Returns duration if >= threshold, None otherwise
     """
     duration = measure_time(func, *args, **kwargs)
-    return duration >= threshold
+    return duration if duration >= threshold else None
 
 
 def sleep_ms(milliseconds):
@@ -98,7 +99,7 @@ def timestamp_to_date(timestamp, ms=False):
     """
     if ms:
         timestamp = timestamp / 1000
-    return datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+    return datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
 
 
 def date_to_timestamp(date_str, ms=False):
@@ -108,7 +109,7 @@ def date_to_timestamp(date_str, ms=False):
         date_str: String like '2024-01-01 00:00:00'
         ms: True to return milliseconds
     """
-    dt = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+    dt = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
     ts = int(dt.timestamp())
     return ts * 1000 if ms else ts
 
@@ -136,60 +137,53 @@ def identify_timestamp(value):
     min_epoch = 946684800  # 2000-01-01
     max_epoch = 1893456000  # 2030-01-01
 
-    result = {
-        'value': value,
-        'type': 'unknown',
-        'unit': 'unknown',
-        'function': None,
-        'date': None,
-        'explanation': ''
-    }
+    result = {"value": value, "type": "unknown", "unit": "unknown", "function": None, "date": None, "explanation": ""}
 
     # Check if it's in seconds range
     if min_epoch <= value <= max_epoch:
-        result['type'] = 'epoch_seconds'
-        result['unit'] = 'seconds'
-        result['function'] = 'epoch_now() or int(time.time())'
-        result['date'] = timestamp_to_date(value)
-        result['explanation'] = f'Epoch timestamp in seconds (~{now_s})'
+        result["type"] = "epoch_seconds"
+        result["unit"] = "seconds"
+        result["function"] = "epoch_now() or int(time.time())"
+        result["date"] = timestamp_to_date(value)
+        result["explanation"] = f"Epoch timestamp in seconds (~{now_s})"
 
     # Check milliseconds range
     elif min_epoch * 1000 <= value <= max_epoch * 1000:
-        result['type'] = 'epoch_milliseconds'
-        result['unit'] = 'milliseconds'
-        result['function'] = 'time_ms() or round(time.time() * 1000)'
-        result['date'] = timestamp_to_date(value, ms=True)
-        result['explanation'] = f'Epoch timestamp in milliseconds (~{now_ms})'
+        result["type"] = "epoch_milliseconds"
+        result["unit"] = "milliseconds"
+        result["function"] = "time_ms() or round(time.time() * 1000)"
+        result["date"] = timestamp_to_date(value, ms=True)
+        result["explanation"] = f"Epoch timestamp in milliseconds (~{now_ms})"
 
     # Check microseconds range
     elif min_epoch * 1000000 <= value <= max_epoch * 1000000:
-        result['type'] = 'epoch_microseconds'
-        result['unit'] = 'microseconds'
-        result['function'] = 'time_us() or round(time.time() * 1000000)'
-        result['date'] = timestamp_to_date(value / 1000000)
-        result['explanation'] = f'Epoch timestamp in microseconds (~{now_us})'
+        result["type"] = "epoch_microseconds"
+        result["unit"] = "microseconds"
+        result["function"] = "time_us() or round(time.time() * 1000000)"
+        result["date"] = timestamp_to_date(value / 1000000)
+        result["explanation"] = f"Epoch timestamp in microseconds (~{now_us})"
 
     # Check nanoseconds range
     elif min_epoch * 1000000000 <= value <= max_epoch * 1000000000:
-        result['type'] = 'epoch_nanoseconds'
-        result['unit'] = 'nanoseconds'
-        result['function'] = 'time_ns()'
-        result['date'] = timestamp_to_date(value / 1000000000)
-        result['explanation'] = f'Epoch timestamp in nanoseconds (~{now_ns})'
+        result["type"] = "epoch_nanoseconds"
+        result["unit"] = "nanoseconds"
+        result["function"] = "time_ns()"
+        result["date"] = timestamp_to_date(value / 1000000000)
+        result["explanation"] = f"Epoch timestamp in nanoseconds (~{now_ns})"
 
     else:
         # Try to guess based on number of digits
         digits = len(str(value))
         if digits == 10:
-            result['explanation'] = 'Looks like seconds but outside reasonable date range'
+            result["explanation"] = "Looks like seconds but outside reasonable date range"
         elif digits == 13:
-            result['explanation'] = 'Looks like milliseconds but outside reasonable date range'
+            result["explanation"] = "Looks like milliseconds but outside reasonable date range"
         elif digits == 16:
-            result['explanation'] = 'Looks like microseconds but outside reasonable date range'
+            result["explanation"] = "Looks like microseconds but outside reasonable date range"
         elif digits == 19:
-            result['explanation'] = 'Looks like nanoseconds but outside reasonable date range'
+            result["explanation"] = "Looks like nanoseconds but outside reasonable date range"
         else:
-            result['explanation'] = f'Unknown format ({digits} digits)'
+            result["explanation"] = f"Unknown format ({digits} digits)"
 
     return result
 
@@ -201,9 +195,9 @@ if __name__ == "__main__":
     print(f"Current micros:    {time_us()}")
 
     # Test timestamp identification
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     print("Timestamp Identification:")
-    print("="*50)
+    print("=" * 50)
 
     test_timestamps = [
         epoch_now(),

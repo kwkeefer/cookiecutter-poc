@@ -1,0 +1,90 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "UV: Run Exploit",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "{{cookiecutter.project_slug}}.cli",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [],
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "subProcess": true,
+            "preLaunchTask": "uv sync"
+        },
+        {
+            "name": "UV: Run Exploit (with args)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "{{cookiecutter.project_slug}}.cli",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--target", "${input:target}",
+                "--lhost", "${input:lhost}",
+                "--lport", "${input:lport}"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "subProcess": true,
+            "preLaunchTask": "uv sync"
+        },
+        {
+            "name": "UV: Start Server",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "{{cookiecutter.project_slug}}.cli",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "args": [
+                "--server",
+                "--port", "8000"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "subProcess": true,
+            "preLaunchTask": "uv sync"
+        },
+        {
+            "name": "UV: Debug Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "preLaunchTask": "uv sync"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "target",
+            "type": "promptString",
+            "description": "Target URL",
+            "default": "http://localhost:8080"
+        },
+        {
+            "id": "lhost",
+            "type": "promptString",
+            "description": "Local IP for callbacks",
+            "default": "10.10.14.5"
+        },
+        {
+            "id": "lport",
+            "type": "promptString",
+            "description": "Local port for reverse shell",
+            "default": "4444"
+        }
+    ]
+}

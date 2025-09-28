@@ -1,0 +1,39 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "uv sync",
+            "type": "shell",
+            "command": "uv sync",
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "uv run exploit",
+            "type": "shell",
+            "command": "uv run python -m {{cookiecutter.project_slug}}.exploit",
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "uv run server",
+            "type": "shell",
+            "command": "uv run {{cookiecutter.project_slug}} server",
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "problemMatcher": [],
+            "isBackground": true
+        }
+    ]
+}
