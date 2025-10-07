@@ -121,11 +121,8 @@ def main():
     if args.proxy:
         out.info(f"Proxy: {args.proxy}")
 
-    try:
-        from {{ cookiecutter.project_slug }}.exploit import run
-        run(args)
-    except ImportError:
-        out.warning("POC not implemented yet - add your code to src/{{ cookiecutter.project_slug }}/exploit.py")
+    from {{ cookiecutter.project_slug }}.exploit import run
+    run(args)
 
 
 if __name__ == "__main__":

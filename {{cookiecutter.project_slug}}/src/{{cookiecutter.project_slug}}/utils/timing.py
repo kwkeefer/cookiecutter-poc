@@ -3,6 +3,7 @@
 
 import time
 from datetime import datetime, timedelta
+from email.utils import parsedate_to_datetime
 
 
 def time_ms():
@@ -21,8 +22,13 @@ def time_ns():
 
 
 def epoch_now():
-    """Current epoch time in seconds"""
+    """Current epoch time in seconds. Use for second-precision timestamps."""
     return int(time.time())
+
+
+def epoch_ms_now():
+    """Current epoch time in milliseconds. Use for millisecond-precision timestamps."""
+    return round(time.time() * 1000)
 
 
 def epoch_range(start_date, end_date, step_minutes=1):
@@ -58,9 +64,17 @@ def epoch_range(start_date, end_date, step_minutes=1):
     return timestamps
 
 
-def epoch_range_ms(start_date, end_date, step_minutes=1):
-    """Same as epoch_range but returns milliseconds"""
-    return [ts * 1000 for ts in epoch_range(start_date, end_date, step_minutes)]
+def epoch_range_ms(start_ms, end_ms):
+    """Generate all millisecond timestamps between start and end
+
+    Args:
+        start_ms: Start timestamp in milliseconds (int)
+        end_ms: End timestamp in milliseconds (int)
+
+    Returns:
+        List of all millisecond timestamps in range
+    """
+    return list(range(start_ms, end_ms + 1))
 
 
 def measure_time(func, *args, **kwargs):
@@ -112,6 +126,20 @@ def date_to_timestamp(date_str, ms=False):
     dt = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
     ts = int(dt.timestamp())
     return ts * 1000 if ms else ts
+
+
+def http_date_to_epoch_ms(http_date):
+    """Convert HTTP Date header to epoch milliseconds
+
+    Args:
+        http_date: HTTP date string (RFC 2822 format)
+                   e.g., 'Sun, 05 Oct 2025 02:43:25 GMT'
+
+    Returns:
+        Epoch timestamp in milliseconds
+    """
+    dt = parsedate_to_datetime(http_date)
+    return int(dt.timestamp() * 1000)
 
 
 def identify_timestamp(value):

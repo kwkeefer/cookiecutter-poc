@@ -45,4 +45,5 @@ def ensure_dirs_exist():
     LOGS_DIR.mkdir(exist_ok=True)
     PAYLOADS_DIR.mkdir(exist_ok=True)
     (PAYLOADS_DIR / "xss").mkdir(exist_ok=True)
+    (PAYLOADS_DIR / "xxe").mkdir(exist_ok=True)
     (PAYLOADS_DIR / "shells").mkdir(exist_ok=True)

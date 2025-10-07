@@ -2,6 +2,7 @@
 
 import asyncio
 from dataclasses import dataclass
+from itertools import product
 from typing import Any, Callable, Dict, Iterator, List, Optional, Union
 
 import httpx
@@ -344,8 +345,6 @@ def generate_multi_payloads(payloads_dict: Dict[str, List[Any]], base_kwargs: Op
             "headers": [{"X-Token": "abc"}, {"X-Token": "xyz"}]
         })
     """
-    from itertools import product
-
     base_kwargs = base_kwargs or {}
 
     # Get all combinations

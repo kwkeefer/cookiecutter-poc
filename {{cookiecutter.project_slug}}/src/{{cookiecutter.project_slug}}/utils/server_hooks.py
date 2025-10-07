@@ -75,6 +75,19 @@ def wait_for_callback(server='http://localhost:8000', timeout=30, param='cookie'
     return None
 
 
+def get_exfil(server='http://localhost:8000', timeout=30):
+    """
+    Pop next exfiltrated data from server queue (for XXE, SSRF, etc).
+
+    Returns just the exfil data string or None if timeout/no data.
+    Will wait up to timeout seconds for data to arrive.
+    """
+    event = get_event(server, timeout, wait=True)
+    if event and event.get('type') == 'exfil':
+        return event.get('data')
+    return None
+
+
 def drain_queue(server='http://localhost:8000'):
     """
     Clear all pending events from the queue.
