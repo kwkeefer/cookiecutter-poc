@@ -90,7 +90,7 @@ class ShellCatcher:
         if use_raw is None:
             use_raw = self.stabilized
 
-        out.success("Entering interactive shell (Ctrl+C to exit)")
+        out.success("Entering interactive shell (type 'exit' to exit)")
         if not self.stabilized:
             out.info("Tip: Run catcher.stabilize() first for better shell")
         elif use_raw:
