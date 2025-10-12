@@ -3,15 +3,18 @@ Shell catcher utility for POCs.
 Catch reverse shells directly in your exploit script.
 """
 
-import socket
-import threading
-import select
-import sys
-import time
-import readline  # For command history
+import builtins
+import contextlib
 import os
+import readline  # For command history
+import select
+import socket
+import sys
 import termios
+import threading
+import time
 import tty
+
 from {{cookiecutter.project_slug}}.utils.output import out
 
 
@@ -34,7 +37,7 @@ class ShellCatcher:
             catcher.interact()
     """
 
-    def __init__(self, port, host='0.0.0.0'):
+    def __init__(self, port, host="0.0.0.0"):
         self.host = host
         self.port = port
         self.listener = None
@@ -101,7 +104,17 @@ class ShellCatcher:
                 tty.setraw(sys.stdin.fileno())
                 self._raw_interact()
             finally:
-                termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_tty)
+                # Restore terminal immediately without waiting
+                try:
+                    # Try TCSANOW first (immediate, no waiting)
+                    termios.tcsetattr(sys.stdin, termios.TCSANOW, old_tty)
+                except:  # noqa: E722
+                    # Fallback to TCSAFLUSH if TCSANOW fails
+                    with contextlib.suppress(builtins.BaseException):
+                        termios.tcsetattr(sys.stdin, termios.TCSAFLUSH, old_tty)
+                # Print newline to clean up terminal display
+                sys.stdout.write("\n")
+                sys.stdout.flush()
         else:
             self._normal_interact()
 
@@ -109,8 +122,8 @@ class ShellCatcher:
         """Normal interaction with readline support"""
         try:
             # Enable readline for history
-            readline.parse_and_bind('tab: complete')
-            readline.parse_and_bind('set editing-mode emacs')
+            readline.parse_and_bind("tab: complete")
+            readline.parse_and_bind("set editing-mode emacs")
 
             while True:
                 # Check if data available from shell
@@ -121,7 +134,7 @@ class ShellCatcher:
                     data = self.client.recv(4096)
                     if not data:
                         break
-                    sys.stdout.write(data.decode('utf-8', errors='replace'))
+                    sys.stdout.write(data.decode("utf-8", errors="replace"))
                     sys.stdout.flush()
 
                 # Input from user
@@ -138,26 +151,78 @@ class ShellCatcher:
 
     def _raw_interact(self):
         """Raw mode interaction (better for PTY shells)"""
+        connection_closed = False
+        # Buffer to detect exit commands
+        input_buffer = b""
+
         try:
             while True:
-                ready = select.select([self.client, sys.stdin], [], [], 0.1)
+                # Check for closed connection using exceptfds
+                ready = select.select([self.client, sys.stdin], [], [self.client], 0.1)
+
+                # Connection error/closed
+                if self.client in ready[2]:
+                    connection_closed = True
+                    break
 
                 if self.client in ready[0]:
-                    data = self.client.recv(4096)
-                    if not data:
+                    try:
+                        data = self.client.recv(4096)
+                        if not data:
+                            connection_closed = True
+                            break
+                        os.write(sys.stdout.fileno(), data)
+                    except (ConnectionResetError, BrokenPipeError, OSError):
+                        connection_closed = True
                         break
-                    os.write(sys.stdout.fileno(), data)
 
                 if sys.stdin in ready[0]:
-                    data = os.read(sys.stdin.fileno(), 4096)
-                    if not data:
+                    try:
+                        data = os.read(sys.stdin.fileno(), 4096)
+                        if not data:
+                            break
+
+                        # Buffer last 10 bytes to detect exit commands
+                        input_buffer = (input_buffer + data)[-10:]
+
+                        # Send data to remote
+                        self.client.send(data)
+
+                        # Check if user typed exit command (with newline/return)
+                        if b"exit\n" in input_buffer or b"exit\r" in input_buffer:
+                            os.write(
+                                sys.stdout.fileno(),
+                                b"[*] Exit detected, closing gracefully...\r\n",
+                            )
+                            # Give remote a moment to process exit and close
+                            time.sleep(0.2)
+                            # Check if remote closed
+                            try:
+                                ready = select.select([self.client], [], [], 0.1)
+                                if self.client in ready[0]:
+                                    data = self.client.recv(4096)
+                                    if data:
+                                        os.write(sys.stdout.fileno(), data)
+                            except:  # noqa: E722
+                                pass
+                            connection_closed = True
+                            break
+
+                    except (ConnectionResetError, BrokenPipeError, OSError):
+                        connection_closed = True
                         break
-                    self.client.send(data)
 
         except KeyboardInterrupt:
+            # Send newline to remote shell before exiting
+            with contextlib.suppress(builtins.BaseException):
+                self.client.send(b"\n")
+        except Exception:
             pass
         finally:
-            self.cleanup()
+            # Print message before terminal restoration
+            if connection_closed:
+                # Write directly to avoid buffering issues
+                os.write(sys.stdout.fileno(), b"\r\n[*] Connection closed\r\n")
 
     def send_command(self, cmd, wait_response=True, timeout=2):
         """Send a single command and optionally get response"""
@@ -179,7 +244,7 @@ class ShellCatcher:
                         break
                     output += chunk
 
-            return output.decode('utf-8', errors='replace')
+            return output.decode("utf-8", errors="replace")
         return None
 
     def stabilize(self):
@@ -213,11 +278,21 @@ class ShellCatcher:
             # Get local terminal size and apply to remote
             try:
                 import shutil
+
                 cols, rows = shutil.get_terminal_size()
                 self.send_command(f"stty rows {rows} cols {cols}")
                 out.info(f"Terminal size set to {rows}x{cols}")
-            except:
-                out.warning("Could not detect terminal size - use: stty rows <rows> cols <cols>")
+            except:  # noqa: E722
+                out.warning(
+                    "Could not detect terminal size - use: stty rows <rows> cols <cols>"
+                )
+
+            # Clear any buffered output from setup commands
+            self._drain_output()
+
+            # Send newline to trigger prompt (don't drain after - we want to see the prompt!)
+            self.client.send(b"\n")
+            time.sleep(0.3)
 
             out.success("Shell upgraded to PTY")
             self.stabilized = True
@@ -234,11 +309,19 @@ class ShellCatcher:
             # Set terminal size for script-based TTY too
             try:
                 import shutil
+
                 cols, rows = shutil.get_terminal_size()
                 self.send_command(f"stty rows {rows} cols {cols}")
                 out.info(f"Terminal size set to {rows}x{cols}")
-            except:
+            except:  # noqa: E722
                 pass
+
+            # Clear buffered output from setup commands
+            self._drain_output()
+
+            # Send newline to trigger prompt (don't drain after - we want to see the prompt!)
+            self.client.send(b"\n")
+            time.sleep(0.3)
 
             out.success("Shell upgraded using script")
             self.stabilized = True
@@ -247,12 +330,36 @@ class ShellCatcher:
         out.warning("Could not upgrade shell (no python/script found)")
         return False
 
+    def _drain_output(self, timeout=0.5):
+        """Drain any pending output from the shell"""
+        start = time.time()
+        while time.time() - start < timeout:
+            ready = select.select([self.client], [], [], 0.1)
+            if self.client in ready[0]:
+                try:
+                    self.client.recv(4096)
+                except:  # noqa: E722
+                    break
+            else:
+                break
+
     def cleanup(self):
         """Clean up connections"""
         if self.client:
-            self.client.close()
+            try:
+                # Set socket timeout to prevent hanging on close
+                self.client.settimeout(0.1)
+                # Try graceful shutdown first
+                with contextlib.suppress(builtins.BaseException):
+                    self.client.shutdown(socket.SHUT_RDWR)
+                self.client.close()
+            except:  # noqa: E722
+                pass
+            self.client = None
         if self.listener:
-            self.listener.close()
+            with contextlib.suppress(builtins.BaseException):
+                self.listener.close()
+            self.listener = None
 
 
 def quick_catch(port=4444, trigger_func=None, trigger_delay=1):
@@ -296,6 +403,7 @@ def auto_shell(port=4444, wait_timeout=30):
                 catcher.send_command("id")
                 catcher.interact()
     """
+
     class ShellContext:
         def __init__(self, port, timeout):
             self.catcher = ShellCatcher(port)
@@ -307,6 +415,7 @@ def auto_shell(port=4444, wait_timeout=30):
             return self
 
         def __exit__(self, *args):
+            # Cleanup immediately, no delay needed
             self.catcher.cleanup()
 
         def wait_and_interact(self):
