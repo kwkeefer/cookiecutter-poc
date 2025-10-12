@@ -17,7 +17,7 @@ A minimal Python cookiecutter template for quickly creating Proof of Concept (PO
 
 ### Prerequisites
 
-- Python 3.12+
+- Python 3.14+
 - [uv](https://github.com/astral-sh/uv) (recommended) or pip
 
 ### Using the Template
@@ -36,9 +36,7 @@ cookiecutter /path/to/cookiecutter-poc-uv
 
 You'll be prompted for:
 - `project_name`: Name of your POC (e.g., "CVE-2024-1234 POC")
-- `target_name`: Target system name
 - `target_url`: Default target URL
-- `poc_description`: Brief description of the vulnerability
 
 ## Generated Project Structure
 

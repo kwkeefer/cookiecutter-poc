@@ -1,6 +1,3 @@
-"""{{ cookiecutter.project_name }}
-
-{{ cookiecutter.poc_description }}
-"""
+"""{{ cookiecutter.project_name }}"""
 
 __version__ = "{{ cookiecutter.version }}"

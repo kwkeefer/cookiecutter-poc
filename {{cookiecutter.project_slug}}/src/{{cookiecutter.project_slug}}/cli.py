@@ -16,7 +16,7 @@ def create_parser():
     """Create argument parser"""
     parser = argparse.ArgumentParser(
         prog="{{ cookiecutter.project_slug }}",
-        description="{{ cookiecutter.poc_description }}",
+        description="{{ cookiecutter.project_name }}",
     )
 
     parser.add_argument(
@@ -115,7 +115,7 @@ def main():
 
 
     # Run exploit
-    out.info(f"{{ cookiecutter.project_name }} - {{ cookiecutter.poc_description }}")
+    out.info(f"{{ cookiecutter.project_name }}")
     out.info(f"Target: {args.target}")
 
     if args.proxy:

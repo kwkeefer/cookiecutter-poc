@@ -3,10 +3,8 @@
     "github_username": "kwkeefer",
     "project_name": "POC Project",
     "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '_').replace('-', '_') }}",
-    "target_name": "Target System",
     "target_url": "http://target.local",
-    "poc_description": "POC for vulnerability exploitation",
     "version": "0.1.0",
-    "python_version": "3.12",
+    "python_version": "3.14",
     "_extensions": ["jinja2.ext.do"]
 }

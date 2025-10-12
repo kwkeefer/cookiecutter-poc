@@ -1,9 +1,6 @@
 # {{ cookiecutter.project_name }}
 
-{{ cookiecutter.poc_description }}
-
-**Target:** {{ cookiecutter.target_name }}
-**URL:** {{ cookiecutter.target_url }}
+**Target URL:** {{ cookiecutter.target_url }}
 
 ## Quick Start
 
