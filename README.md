@@ -36,7 +36,7 @@ Full documentation available at: **https://cookiecutter-poc.readthedocs.io/en/la
 
 **This software is intended for authorized security testing and research purposes only.**
 
-Use responsibly and only on systems you have explicit permission to test. Unauthorized access to computer systems is illegal. Don't use this to hack stuff you're not supposed to be hacking. Don't do dumb stuff.
+Use responsibly and only on systems you have explicit permission to test. Don't use this to hack stuff you're not supposed to be hacking. Don't do dumb stuff.
 
 The authors are not responsible for misuse or for any damage caused by this software.
 
