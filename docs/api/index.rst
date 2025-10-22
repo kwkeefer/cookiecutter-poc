@@ -23,5 +23,5 @@ The POC template includes a comprehensive set of utilities organized into module
 * **File Upload** - Upload files with bypass techniques
 * **Batch Requests** - Intruder-style fuzzing and testing
 * **Shell Catcher** - Catch and interact with reverse shells in Python
-* **Apache Hooks** - Read callbacks from Apache logs (OSWE fallback)
+* **Apache Hooks** - Read callbacks from Apache logs
 * **And more** - Encoding, HTML parsing, network utilities, timing, zip handling

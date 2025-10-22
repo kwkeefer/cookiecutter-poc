@@ -1,6 +1,7 @@
 """
-Apache log parsing utilities for OSWE exam fallback.
-Use this when exam requires Apache2 instead of the built-in server.
+Apache log parsing utilities.
+
+Use this when you need to read callbacks from Apache logs instead of the built-in server.
 
 Parses Apache access.log for both query and path parameters:
 - Query parameters: /?cookie=data or /?exfil=data

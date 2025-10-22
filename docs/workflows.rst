@@ -405,8 +405,8 @@ Test multiple credentials efficiently:
    if __name__ == "__main__":
        credential_stuffing("http://target.local")
 
-Complete HTB/OSWE Workflow
---------------------------
+Complete Exploitation Workflow
+-------------------------------
 
 Full exploitation chain:
 

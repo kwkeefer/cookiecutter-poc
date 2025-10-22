@@ -221,8 +221,8 @@ Intruder-style fuzzing with concurrency:
        concurrency=50
    )
 
-Apache Hooks (OSWE Fallback)
------------------------------
+Apache Hooks
+------------
 
 Read callbacks from Apache logs instead of built-in server:
 

@@ -48,6 +48,18 @@ napoleon_attr_annotations = True
 # Autosummary settings
 autosummary_generate = True
 
+# Mock imports for modules we don't want to install in docs environment
+autodoc_mock_imports = [
+    'colorama',
+    'requests',
+    'urllib3',
+    'netifaces',
+    'httpx',
+    'beautifulsoup4',
+    'requests_toolbelt',
+    'retrying',
+]
+
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'your_project']
 

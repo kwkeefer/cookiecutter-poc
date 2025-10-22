@@ -44,7 +44,7 @@ This template includes utilities for common POC tasks:
 - **XXE Helpers** - XML exploitation payloads
 - **File Upload** - Upload with bypass techniques
 - **Shell Catcher** - Interactive shell handler
-- **Apache Hooks** - Read callbacks from Apache logs (OSWE fallback)
+- **Apache Hooks** - Read callbacks from Apache logs
 - And more...
 
 ## Documentation
