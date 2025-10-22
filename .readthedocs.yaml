@@ -9,14 +9,15 @@ build:
   tools:
     python: "3.13"
   jobs:
-    # Install uv for faster dependency installation
-    pre_install:
-      - pip install uv
-      - uv pip install --system -r docs/requirements.txt
     pre_build:
       - bash docs/generate_example.sh
     post_build:
       - echo "Documentation built successfully!"
+
+# Python configuration
+python:
+  install:
+    - requirements: docs/requirements.txt
 
 # Sphinx configuration
 sphinx:
