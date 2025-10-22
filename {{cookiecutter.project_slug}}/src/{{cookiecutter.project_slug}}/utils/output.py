@@ -38,6 +38,7 @@ class Output:
             >>> Output.set_verbose(True)
             >>> out.debug("This will now be visible")
         """
+        """
         cls.verbose = enabled
 
     @staticmethod
@@ -50,7 +51,8 @@ class Output:
 
         Examples:
             >>> out.success("Target is vulnerable!")
-            [+] Target is vulnerable!  # (in green)
+            >>> [+] Target is vulnerable!  # (in green)
+        """
         """
         print(f"{Fore.GREEN}[+] {msg}{Style.RESET_ALL}")
 
@@ -64,7 +66,8 @@ class Output:
 
         Examples:
             >>> out.error("Connection failed")
-            [-] Connection failed  # (in red)
+            >>> [-] Connection failed  # (in red)
+        """
         """
         print(f"{Fore.RED}[-] {msg}{Style.RESET_ALL}")
 
@@ -78,7 +81,8 @@ class Output:
 
         Examples:
             >>> out.info("Starting exploit")
-            [*] Starting exploit  # (in blue)
+            >>> [*] Starting exploit  # (in blue)
+        """
         """
         print(f"{Fore.BLUE}[*] {msg}{Style.RESET_ALL}")
 
@@ -92,7 +96,8 @@ class Output:
 
         Examples:
             >>> out.warning("Using default credentials")
-            [!] Using default credentials  # (in yellow)
+            >>> [!] Using default credentials  # (in yellow)
+        """
         """
         print(f"{Fore.YELLOW}[!] {msg}{Style.RESET_ALL}")
 
@@ -109,11 +114,12 @@ class Output:
         Examples:
             >>> Output.set_verbose(True)
             >>> out.debug("Response: 200 OK")
-            [DEBUG] Response: 200 OK  # (in magenta)
+            >>> [DEBUG] Response: 200 OK  # (in magenta)
             >>>
             >>> Output.set_verbose(False)
             >>> out.debug("This won't print")
-            # (no output)
+            >>> # (no output)
+        """
         """
         if Output.verbose:
             print(f"{Fore.MAGENTA}[DEBUG] {msg}{Style.RESET_ALL}")
@@ -128,7 +134,8 @@ class Output:
 
         Examples:
             >>> out.status("Extracting data...")
-            [...] Extracting data...  # (in cyan)
+            >>> [...] Extracting data...  # (in cyan)
+        """
         """
         print(f"{Fore.CYAN}[...] {msg}{Style.RESET_ALL}")
 
@@ -143,9 +150,10 @@ class Output:
 
         Examples:
             >>> out.raw("Plain text")
-            Plain text
+            >>> Plain text
             >>> out.raw("Colored text", Fore.MAGENTA)
-            Colored text  # (in magenta)
+            >>> Colored text  # (in magenta)
+        """
         """
         if color:
             print(f"{color}{msg}{Style.RESET_ALL}")

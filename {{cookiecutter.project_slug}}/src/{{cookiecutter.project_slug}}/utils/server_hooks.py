@@ -56,13 +56,12 @@ def wait_for_callback(server='http://localhost:8000', timeout=30, param='cookie'
     Wait for a specific callback type to arrive.
 
     Examples:
-        # Send XSS payload
-        send_payload(xss)
-
-        # Wait for cookie to arrive
-        cookie = wait_for_callback(timeout=10)
-        if cookie:
-            print(f"Got cookie: {cookie}")
+        >>> # Send XSS payload
+        >>> send_payload(xss)
+        >>> # Wait for cookie to arrive
+        >>> cookie = wait_for_callback(timeout=10)
+        >>> if cookie:
+        ...     print(f"Got cookie: {cookie}")
     """
     start_time = time.time()
 

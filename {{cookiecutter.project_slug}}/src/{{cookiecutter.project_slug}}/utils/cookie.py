@@ -23,10 +23,11 @@ def parse_cookie_string(cookie_string):
         >>> cookie_str = "token=abc123; username=admin; session=xyz"
         >>> cookies = parse_cookie_string(cookie_str)
         >>> cookies
-        {'token': 'abc123', 'username': 'admin', 'session': 'xyz'}
+        >>> {'token': 'abc123', 'username': 'admin', 'session': 'xyz'}
         >>>
         >>> # Use with requests:
         >>> response = requests.get(url, cookies=cookies)
+    """
     """
     if not cookie_string:
         return {}
@@ -58,11 +59,12 @@ def cookie_string_to_header(cookie_string):
         >>> cookie_str = "token=abc123; username=admin"
         >>> header = cookie_string_to_header(cookie_str)
         >>> header
-        'token=abc123; username=admin'
+        >>> 'token=abc123; username=admin'
         >>>
         >>> # Use with requests:
         >>> headers = {'Cookie': header}
         >>> response = requests.get(url, headers=headers)
+    """
     """
     # Parse and reconstruct to ensure clean formatting
     cookies = parse_cookie_string(cookie_string)

