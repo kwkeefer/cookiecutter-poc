@@ -1,6 +1,4 @@
 {
-    "full_name": "Kyle Keefer",
-    "github_username": "kwkeefer",
     "project_name": "POC Project",
     "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '_').replace('-', '_') }}",
     "target_url": "http://target.local",

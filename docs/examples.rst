@@ -248,8 +248,8 @@ CLI watch mode:
 
 .. code-block:: bash
 
-   python -m utils.apache_hooks watch
-   python -m utils.apache_hooks watch /var/log/apache2/access.log cookies exfil
+   uv run python -m your_project.utils.apache_hooks watch
+   uv run python -m your_project.utils.apache_hooks watch /var/log/apache2/access.log cookies exfil
 
 Network Utilities
 -----------------

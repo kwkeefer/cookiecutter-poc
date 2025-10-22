@@ -7,12 +7,12 @@ import os
 import sys
 
 # Add the generated example project to the path so Sphinx can import it
-sys.path.insert(0, os.path.abspath('./poc_example/src'))
+sys.path.insert(0, os.path.abspath('./your_project/src'))
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'Cookiecutter POC Template'
+project = 'cookiecutter-poc'
 copyright = '2025, Kyle Keefer'
 author = 'Kyle Keefer'
 release = '0.1.0'
@@ -49,7 +49,7 @@ napoleon_attr_annotations = True
 autosummary_generate = True
 
 templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'poc_example']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'your_project']
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

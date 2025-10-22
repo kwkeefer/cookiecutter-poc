@@ -1,7 +1,7 @@
-Cookiecutter POC Template Documentation
-=========================================
+cookiecutter-poc
+================
 
-Welcome to the Cookiecutter POC Template documentation! This template helps you quickly create lean, fast Proof-of-Concept projects for security research and exploitation development.
+A minimal cookiecutter template for quickly creating lean, fast Proof-of-Concept projects for security research and exploitation development.
 
 The goal is **speed and simplicity** - get a working POC fast without unnecessary complexity.
 
@@ -19,7 +19,7 @@ Features
 --------
 
 * **Quick POC Creation** - Generate new projects in seconds
-* **Built-in Utilities** - Common exploit patterns pre-implemented
+* **Built-in Utilities** - Common exploit patterns
 * **HTTP Servers** - Log callbacks, serve payloads
 * **Reverse Shell Management** - Generate and catch shells directly in Python
 * **XSS & XXE Helpers** - Pre-built payload generators
@@ -32,15 +32,15 @@ Generate a new POC project:
 
 .. code-block:: bash
 
-   uvx cookiecutter /path/to/this/template
+   uvx cookiecutter https://github.com/kwkeefer/cookiecutter-poc
 
 Inside your generated project:
 
 .. code-block:: bash
 
-   make dev          # Setup environment
-   make run          # Run the POC CLI
-   python servers/server.py  # Start callback server
+   cd your_project
+   uv run your_project --help       # Run the POC CLI
+   uv run your_project --server     # Start callback server
 
 Philosophy
 ----------

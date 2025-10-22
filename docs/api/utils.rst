@@ -6,7 +6,7 @@ All utility modules included in generated POC projects.
 Output
 ------
 
-.. automodule:: poc_example.utils.output
+.. automodule:: your_project.utils.output
    :members:
    :undoc-members:
    :show-inheritance:
@@ -14,7 +14,7 @@ Output
 Cookie Handling
 ---------------
 
-.. automodule:: poc_example.utils.cookie
+.. automodule:: your_project.utils.cookie
    :members:
    :undoc-members:
    :show-inheritance:
@@ -22,7 +22,7 @@ Cookie Handling
 Server Hooks
 ------------
 
-.. automodule:: poc_example.utils.server_hooks
+.. automodule:: your_project.utils.server_hooks
    :members:
    :undoc-members:
    :show-inheritance:
@@ -30,7 +30,7 @@ Server Hooks
 Reverse Shells
 --------------
 
-.. automodule:: poc_example.utils.reverse_shells
+.. automodule:: your_project.utils.reverse_shells
    :members:
    :undoc-members:
    :show-inheritance:
@@ -38,7 +38,7 @@ Reverse Shells
 Shell Catcher
 -------------
 
-.. automodule:: poc_example.utils.shell_catcher
+.. automodule:: your_project.utils.shell_catcher
    :members:
    :undoc-members:
    :show-inheritance:
@@ -46,7 +46,7 @@ Shell Catcher
 XSS Payloads
 ------------
 
-.. automodule:: poc_example.utils.xss
+.. automodule:: your_project.utils.xss
    :members:
    :undoc-members:
    :show-inheritance:
@@ -54,7 +54,7 @@ XSS Payloads
 XXE Payloads
 ------------
 
-.. automodule:: poc_example.utils.xxe
+.. automodule:: your_project.utils.xxe
    :members:
    :undoc-members:
    :show-inheritance:
@@ -62,7 +62,7 @@ XXE Payloads
 File Upload
 -----------
 
-.. automodule:: poc_example.utils.file_upload
+.. automodule:: your_project.utils.file_upload
    :members:
    :undoc-members:
    :show-inheritance:
@@ -70,7 +70,7 @@ File Upload
 Batch Requests
 --------------
 
-.. automodule:: poc_example.utils.batch_request
+.. automodule:: your_project.utils.batch_request
    :members:
    :undoc-members:
    :show-inheritance:
@@ -78,7 +78,7 @@ Batch Requests
 Apache Hooks
 ------------
 
-.. automodule:: poc_example.utils.apache_hooks
+.. automodule:: your_project.utils.apache_hooks
    :members:
    :undoc-members:
    :show-inheritance:
@@ -86,7 +86,7 @@ Apache Hooks
 Encoding
 --------
 
-.. automodule:: poc_example.utils.encoding
+.. automodule:: your_project.utils.encoding
    :members:
    :undoc-members:
    :show-inheritance:
@@ -94,7 +94,7 @@ Encoding
 HTML Parser
 -----------
 
-.. automodule:: poc_example.utils.html_parser
+.. automodule:: your_project.utils.html_parser
    :members:
    :undoc-members:
    :show-inheritance:
@@ -102,7 +102,7 @@ HTML Parser
 Network
 -------
 
-.. automodule:: poc_example.utils.network
+.. automodule:: your_project.utils.network
    :members:
    :undoc-members:
    :show-inheritance:
@@ -110,7 +110,7 @@ Network
 Paths
 -----
 
-.. automodule:: poc_example.utils.paths
+.. automodule:: your_project.utils.paths
    :members:
    :undoc-members:
    :show-inheritance:
@@ -118,7 +118,7 @@ Paths
 Process
 -------
 
-.. automodule:: poc_example.utils.process
+.. automodule:: your_project.utils.process
    :members:
    :undoc-members:
    :show-inheritance:
@@ -126,7 +126,7 @@ Process
 Timing
 ------
 
-.. automodule:: poc_example.utils.timing
+.. automodule:: your_project.utils.timing
    :members:
    :undoc-members:
    :show-inheritance:
@@ -134,7 +134,7 @@ Timing
 Zip Utilities
 -------------
 
-.. automodule:: poc_example.utils.zip_util
+.. automodule:: your_project.utils.zip_util
    :members:
    :undoc-members:
    :show-inheritance:

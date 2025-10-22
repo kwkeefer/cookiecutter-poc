@@ -5,13 +5,10 @@
 ## Quick Start
 
 ```bash
-# 1. Setup environment
-make dev
-
-# 2. Start callback server (terminal 1)
+# 1. Start callback server (terminal 1)
 uv run {{ cookiecutter.project_slug }} --server
 
-# 3. Run exploit (terminal 2)
+# 2. Run exploit (terminal 2)
 uv run {{ cookiecutter.project_slug }} -t http://target.com
 ```
 
@@ -218,5 +215,4 @@ Options:
 
 ---
 
-Created: {{ cookiecutter.full_name }}
-Template: [cookiecutter-poc-uv](https://github.com/kwkeefer/cookiecutter-poc-uv)
+Template: [cookiecutter-poc](https://github.com/kwkeefer/cookiecutter-poc)

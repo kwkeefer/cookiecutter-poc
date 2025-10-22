@@ -8,7 +8,7 @@ POC HTTP Server
 
 Simple HTTP server that serves payloads and logs all requests. Automatically captures cookies and exfiltrated data.
 
-.. automodule:: poc_example.servers.server
+.. automodule:: your_project.servers.server
    :members:
    :undoc-members:
    :show-inheritance:
@@ -20,11 +20,11 @@ Start the server from your project directory:
 
 .. code-block:: bash
 
-   # From generated project root:
-   python -m poc_example.servers.server
+   # Using the CLI (recommended):
+   uv run your_project --server
 
-   # Or using the CLI:
-   poc_example server
+   # Or run directly:
+   uv run python -m your_project.servers.server
 
 The server will:
 

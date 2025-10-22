@@ -28,7 +28,7 @@ clean:
 	@echo "Cleaning build directory..."
 	@rm -rf $(BUILDDIR)
 	@echo "Cleaning generated example..."
-	@rm -rf poc_example
+	@rm -rf your_project
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).

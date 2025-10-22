@@ -1,3 +1,6 @@
+# Test project directory (generated from template for manual testing)
+test/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

@@ -3,6 +3,22 @@ Quick Start
 
 Build your first POC in 5 minutes.
 
+Prerequisites
+-------------
+
+Install `uv <https://docs.astral.sh/uv/>`_ (used for package management and running cookiecutter):
+
+.. code-block:: bash
+
+   # macOS/Linux
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+
+   # Or with pip
+   pip install uv
+
+   # Or with brew (macOS)
+   brew install uv
+
 Create a New POC Project
 ------------------------
 
@@ -12,14 +28,13 @@ Create a New POC Project
 
 Answer the prompts (or press Enter for defaults).
 
-Setup Environment
------------------
+Run Your First Command
+-----------------------
 
 .. code-block:: bash
 
    cd your_project_name
-   make dev
-   source .venv/bin/activate
+   uv run your_project --help
 
 Your First Exploit
 -------------------
@@ -84,7 +99,7 @@ In one terminal, start the callback server:
 
 .. code-block:: bash
 
-   python -m your_project.servers.server
+   uv run your_project --server
 
 In another terminal, run your exploit:
 

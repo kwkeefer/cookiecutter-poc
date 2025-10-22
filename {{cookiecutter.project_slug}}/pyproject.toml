@@ -8,9 +8,9 @@ version = "{{ cookiecutter.version }}"
 description = "{{ cookiecutter.project_name }}"
 readme = "README.md"
 requires-python = ">={{ cookiecutter.python_version }}"
-license = { text = "Proprietary" }
+license = { text = "MIT" }
 authors = [
-    { name = "{{ cookiecutter.full_name }}" },
+    { name = "Security Researcher" },
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -45,10 +45,6 @@ crypto = [
 
 [project.scripts]
 {{ cookiecutter.project_slug }} = "{{ cookiecutter.project_slug }}.cli:main"
-
-[project.urls]
-Homepage = "https://github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}"
-Repository = "https://github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/{{ cookiecutter.project_slug }}"]

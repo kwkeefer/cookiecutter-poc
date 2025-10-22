@@ -1,13 +1,26 @@
 Installation
 ============
 
-Getting started with the Cookiecutter POC Template.
+Getting started with ``cookiecutter-poc``.
 
 Prerequisites
 -------------
 
 * Python 3.12 or higher
-* ``cookiecutter`` installed (via uvx or pip)
+* `uv <https://docs.astral.sh/uv/>`_ installed (provides uvx and package management)
+
+Install uv:
+
+.. code-block:: bash
+
+   # macOS/Linux
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+
+   # Or with pip
+   pip install uv
+
+   # Or with brew (macOS)
+   brew install uv
 
 Quick Install
 -------------
@@ -39,8 +52,6 @@ Template Prompts
 
 When you run cookiecutter, you'll be prompted for:
 
-* **full_name**: Your name (for project metadata)
-* **github_username**: Your GitHub username
 * **project_name**: Human-readable project name (e.g., "HTB Admirer POC")
 * **project_slug**: Python package name (auto-generated from project_name)
 * **target_url**: Default target URL (can be changed later)
@@ -69,35 +80,23 @@ After generation, you'll have:
    ├── payloads/                   # Files to serve (XSS, shells, etc)
    ├── logs/                       # Server logs
    ├── tests/                      # Tests (optional)
-   ├── pyproject.toml              # Project configuration
-   └── Makefile                    # Convenient commands
+   └── pyproject.toml              # Project configuration
 
-Setup Your Project
-------------------
+Run Your Project
+----------------
 
-After generating a project:
-
-.. code-block:: bash
-
-   cd your_project
-   make dev          # Creates venv, installs dependencies
-   source .venv/bin/activate  # Or: .venv\\Scripts\\activate on Windows
-
-Verify Installation
--------------------
-
-Test that everything works:
+No setup needed! Just run it:
 
 .. code-block:: bash
 
    # Run the CLI
-   make run
+   uv run your_project --help
 
-   # Or directly:
-   python -m your_project --help
+   # Start the callback server
+   uv run your_project --server
 
-   # Start the server
-   python -m your_project.servers.server
+   # Run against a target
+   uv run your_project --target http://target.local
 
 Next Steps
 ----------
