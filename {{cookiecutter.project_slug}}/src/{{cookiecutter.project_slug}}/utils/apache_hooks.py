@@ -4,8 +4,9 @@ Apache log parsing utilities.
 Use this when you need to read callbacks from Apache logs instead of the built-in server.
 
 Parses Apache access.log for both query and path parameters:
-- Query parameters: /?cookie=data or /?exfil=data
-- Path parameters: /cookie/data or /exfil/data
+
+- Query parameters: ``/?cookie=data`` or ``/?exfil=data``
+- Path parameters: ``/cookie/data`` or ``/exfil/data``
 
 Works similarly to server_hooks.py but reads from log files.
 """
@@ -22,10 +23,14 @@ def parse_apache_line(line: str) -> dict:
     Parse Apache combined log format line.
 
     Example line:
-    ::1 - - [13/Oct/2025:13:20:01 -0700] "GET /?cookies=test HTTP/1.1" 200 3454 "-" "Mozilla/5.0..."
 
-    Returns dict with: timestamp, method, path, query_params, path_params, status
-    Also extracts path-based parameters like /cookie/data or /exfil/data
+    .. code-block:: text
+
+        ::1 - - [13/Oct/2025:13:20:01 -0700] "GET /?cookies=test HTTP/1.1" 200 3454 "-" "Mozilla/5.0..."
+
+    Returns:
+        dict with: timestamp, method, path, query_params, path_params, status.
+        Also extracts path-based parameters like ``/cookie/data`` or ``/exfil/data``
     """
     # Apache combined log format regex
     pattern = r'([^\s]+) - - \[([^\]]+)\] "(\w+) ([^\s]+) HTTP/[^"]+" (\d+) (\d+|-) "([^"]*)" "([^"]*)"'
@@ -92,8 +97,9 @@ def find_param_in_logs(log_file: str, param_name: str, timeout: int = 30) -> str
     Returns the MOST RECENT occurrence (last match in file).
 
     Searches for both:
-    - Query parameters: ?param_name=value or &param_name=value
-    - Path parameters: /param_name/value
+
+    - Query parameters: ``?param_name=value`` or ``&param_name=value``
+    - Path parameters: ``/param_name/value``
 
     Args:
         log_file: Path to Apache access.log
@@ -140,8 +146,9 @@ def get_cookie(log_file: str = '/var/log/apache2/access.log', timeout: int = 30)
     Get cookie value from Apache logs.
 
     Supports both query and path parameters:
-    - Query: /?cookies=value or /?cookie=value
-    - Path: /cookie/value
+
+    - Query: ``/?cookies=value`` or ``/?cookie=value``
+    - Path: ``/cookie/value``
 
     Args:
         log_file: Path to Apache access.log
@@ -173,8 +180,9 @@ def get_exfil(log_file: str = '/var/log/apache2/access.log', timeout: int = 30) 
     Get exfiltrated data from Apache logs.
 
     Supports both query and path parameters:
-    - Query: /?exfil=value
-    - Path: /exfil/value
+
+    - Query: ``/?exfil=value``
+    - Path: ``/exfil/value``
 
     Args:
         log_file: Path to Apache access.log
@@ -216,8 +224,9 @@ def watch_log(log_file: str = '/var/log/apache2/access.log', params: list = None
     Watch Apache log in real-time and print interesting parameters.
 
     Monitors for both query and path parameters:
-    - Query: /?param=value
-    - Path: /param/value
+
+    - Query: ``/?param=value``
+    - Path: ``/param/value``
 
     Args:
         log_file: Path to Apache access.log
