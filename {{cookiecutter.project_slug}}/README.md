@@ -94,14 +94,17 @@ The built-in server (`servers/server.py`):
 
 ### Start Server
 ```bash
-# Via CLI (port 8000)
+# Via CLI (default port 8000)
 uv run {{ cookiecutter.project_slug }} --server
 
 # Custom port
-uv run {{ cookiecutter.project_slug }} --server --port 8080
+uv run {{ cookiecutter.project_slug }} --server --lport 8080
 
-# Direct execution
-uv run python servers/server.py -p 8080
+# Bind to specific interface
+uv run {{ cookiecutter.project_slug }} --server --lhost 10.10.14.5 --lport 8080
+
+# Direct module execution
+python -m {{ cookiecutter.project_slug }}.servers.server
 ```
 
 ### Check Logs
@@ -201,7 +204,8 @@ Options:
   --threads N          Number of threads
   -v, --verbose        Verbose output
   --server             Start callback server
-  --port N             Server port (default: 8000)
+  --lhost IP           Local host for server/callbacks (auto-detected)
+  --lport N            Local port for server/callbacks (default: 8000)
 ```
 
 ## Files

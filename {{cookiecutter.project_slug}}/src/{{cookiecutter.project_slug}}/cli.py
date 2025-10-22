@@ -9,7 +9,7 @@ import time
 from pathlib import Path
 from {{ cookiecutter.project_slug }} import __version__
 from {{ cookiecutter.project_slug }}.utils.network import get_interfaces, get_callback_host
-from {{ cookiecutter.project_slug }}.utils.output import out
+from {{ cookiecutter.project_slug }}.utils.output import out, Output
 
 
 def create_parser():
@@ -32,13 +32,6 @@ def create_parser():
         help="Start HTTP server for callbacks and payloads",
     )
 
-    parser.add_argument(
-        "--port",
-        type=int,
-        default=8000,
-        help="Server port (default: 8000)",
-    )
-
     # Exploit options
     parser.add_argument(
         "--target",
@@ -57,14 +50,14 @@ def create_parser():
         "--lhost",
         type=str,
         default=None,
-        help="Local host address for callbacks (defaults to tun0 if available)",
+        help="Local host - server mode: bind address (default: 0.0.0.0), exploit mode: callback IP (auto-detected from tun0/eth0)",
     )
 
     parser.add_argument(
         "--lport",
-        type=str,
-        default=None,
-        help="Local port for callbacks (defaults to --port value)",
+        type=int,
+        default=8000,
+        help="Local port for server/callbacks (default: 8000)",
     )
 
     parser.add_argument(
@@ -89,22 +82,23 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
 
+    # Set verbose mode for debug output
+    if args.verbose:
+        Output.set_verbose(True)
+
     if args.server:
         # Start the HTTP server
-        out.info(f"Starting server on port {args.port}...")
+        bind_addr = args.lhost if args.lhost else '0.0.0.0'
+        out.info(f"Starting server on {bind_addr}:{args.lport}...")
         try:
             from {{ cookiecutter.project_slug }}.servers import server
-            server_args = argparse.Namespace(port=args.port, bind='0.0.0.0')
+            server_args = argparse.Namespace(port=args.lport, bind=bind_addr)
             server.main_with_args(server_args)
         except KeyboardInterrupt:
             out.info("Server stopped")
         sys.exit(0)
     else:
-        # Handle callback host/port defaults
-        if args.lport is None:
-            args.lport = str(args.port)
-            out.warning(f"--lport not set, defaulting to --port value: {args.lport}")
-
+        # Handle callback host defaults
         if args.lhost is None:
             args.lhost = get_callback_host()
             interfaces = get_interfaces()

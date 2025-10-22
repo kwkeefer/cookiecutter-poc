@@ -18,7 +18,27 @@ class Output:
 
     Provides static methods for different types of console messages
     with color coding and prefixes for better visibility.
+
+    Attributes:
+        verbose (bool): Class variable controlling debug output visibility
     """
+
+    verbose = False
+
+    @classmethod
+    def set_verbose(cls, enabled: bool):
+        """
+        Enable or disable verbose (debug) output.
+
+        Args:
+            enabled: True to show debug messages, False to hide them
+
+        Example:
+            >>> from utils.output import Output
+            >>> Output.set_verbose(True)
+            >>> out.debug("This will now be visible")
+        """
+        cls.verbose = enabled
 
     @staticmethod
     def success(msg):
@@ -81,14 +101,22 @@ class Output:
         """
         Print a debug message in magenta with [DEBUG] prefix.
 
+        Only prints if verbose mode is enabled via Output.set_verbose(True).
+
         Args:
             msg: Debug message to display
 
         Example:
+            >>> Output.set_verbose(True)
             >>> out.debug("Response: 200 OK")
             [DEBUG] Response: 200 OK  # (in magenta)
+            >>>
+            >>> Output.set_verbose(False)
+            >>> out.debug("This won't print")
+            # (no output)
         """
-        print(f"{Fore.MAGENTA}[DEBUG] {msg}{Style.RESET_ALL}")
+        if Output.verbose:
+            print(f"{Fore.MAGENTA}[DEBUG] {msg}{Style.RESET_ALL}")
 
     @staticmethod
     def status(msg):
@@ -131,11 +159,19 @@ out = Output()
 
 if __name__ == "__main__":
     # Examples
+    print("=== Standard Output ===")
     out.success("Target is vulnerable!")
     out.error("Connection failed")
     out.info("Starting exploit")
     out.warning("Using default credentials")
-    out.debug("Response: 200 OK")
     out.status("Extracting data...")
     out.raw("No prefix here")
     out.raw("Custom color", Fore.MAGENTA)
+
+    print("\n=== Debug Output (verbose=False) ===")
+    out.debug("This debug message won't appear")
+
+    print("\n=== Debug Output (verbose=True) ===")
+    Output.set_verbose(True)
+    out.debug("Response: 200 OK")
+    out.debug("Headers: {'Content-Type': 'application/json'}")
