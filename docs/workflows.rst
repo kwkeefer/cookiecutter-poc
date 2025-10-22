@@ -20,6 +20,7 @@ Start the HTTP callback server first:
 
 .. code-block:: python
 
+   # src/your_project/exploit.py
    import requests
    from your_project.utils.output import out
    from your_project.utils.xss import cookie_stealer
@@ -87,6 +88,7 @@ From command injection to full PTY shell.
 
 .. code-block:: python
 
+   # src/your_project/exploit.py
    import requests
    from your_project.utils.output import out
    from your_project.utils.reverse_shells import python_oneliner, bash_shell
@@ -140,6 +142,7 @@ Upload malicious file and get shell.
 
 .. code-block:: python
 
+   # src/your_project/exploit.py
    import requests
    from your_project.utils.output import out
    from your_project.utils.file_upload import FileUploader
@@ -207,6 +210,7 @@ Start the HTTP callback server first:
 
 .. code-block:: python
 
+   # src/your_project/exploit.py
    import requests
    from your_project.utils.output import out
    from your_project.utils.xxe import quick_test
@@ -260,6 +264,7 @@ Extract data from blind SQLi.
 
 .. code-block:: python
 
+   # src/your_project/exploit.py
    import requests
    import string
    from your_project.utils.output import out
@@ -355,6 +360,7 @@ Exploit SSRF to access internal services.
 
 .. code-block:: python
 
+   # src/your_project/exploit.py
    import requests
    from your_project.utils.output import out
    from your_project.utils.batch_request import batch_request_sync, generate_param_payloads
@@ -426,6 +432,7 @@ Test multiple credentials efficiently.
 
 .. code-block:: python
 
+   # src/your_project/exploit.py
    import httpx
    from your_project.utils.output import out
    from your_project.utils.batch_request import batch_request_sync, generate_json_payloads
@@ -491,6 +498,7 @@ Start the HTTP callback server first:
 
 .. code-block:: python
 
+   # src/your_project/exploit.py
    import requests
    from your_project.utils.output import out
    from your_project.utils.html_parser import HTMLParser
