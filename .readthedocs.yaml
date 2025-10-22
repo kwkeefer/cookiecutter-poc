@@ -9,6 +9,8 @@ build:
   tools:
     python: "3.13"
   jobs:
+    pre_install:
+      - pip install uv
     pre_build:
       - bash docs/generate_example.sh
     post_build:
