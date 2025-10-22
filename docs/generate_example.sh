@@ -17,7 +17,7 @@ echo "Generating example project for documentation..."
 # Generate project with cookiecutter using no-input mode
 # This creates a real, importable Python project for Sphinx to document
 cd "$SCRIPT_DIR"
-cookiecutter "$TEMPLATE_DIR" --no-input \
+uvx cookiecutter "$TEMPLATE_DIR" --no-input \
     full_name="Example User" \
     github_username="example" \
     project_name="POC Example" \
