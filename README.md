@@ -1,6 +1,6 @@
 # cookiecutter-poc
 
-A minimal Python [cookiecutter](https://cookiecutter.readthedocs.io/en/stable/README.html) template for rapid Proof-of-Concepts in web security research and exploit development.
+A Python [cookiecutter](https://cookiecutter.readthedocs.io/en/stable/README.html) template for rapid Proof-of-Concepts in web security research and exploit development.
 
 **Focus on hacking, not boilerplate code.**
 

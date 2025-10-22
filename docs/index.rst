@@ -1,7 +1,7 @@
 cookiecutter-poc
 ================
 
-A minimal `cookiecutter <https://cookiecutter.readthedocs.io/en/stable/README.html>`_ template for rapid Proof-of-Concepts in web security research and exploit development.
+A `cookiecutter <https://cookiecutter.readthedocs.io/en/stable/README.html>`_ template for rapid Proof-of-Concepts in web security research and exploit development.
 
 **Focus on hacking, not boilerplate code.**
 
@@ -24,7 +24,6 @@ Features
 * **HTTP Servers** - Log callbacks, serve payloads
 * **Reverse Shell Management** - Generate and catch shells directly in Python
 * **XSS & XXE Helpers** - Pre-built payload generators
-* **Minimal Dependencies** - Keep it simple and fast
 
 Quick Start
 -----------
