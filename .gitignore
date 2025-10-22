@@ -73,7 +73,7 @@ instance/
 
 # Sphinx documentation
 docs/_build/
-docs/poc_example/
+docs/your_project/
 
 # PyBuilder
 .pybuilder/

@@ -65,6 +65,7 @@ autodoc_mock_imports = [
     'netifaces',
     'httpx',
     'beautifulsoup4',
+    'bs4',
     'requests_toolbelt',
     'retrying',
 ]
