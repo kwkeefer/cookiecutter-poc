@@ -54,7 +54,7 @@ class Output:
             .. code-block:: python
 
                 out.success("Target is vulnerable!")
-                [+] Target is vulnerable!  # (in green)
+                # Output: [+] Target is vulnerable!  (in green)
         """
         print(f"{Fore.GREEN}[+] {msg}{Style.RESET_ALL}")
 
@@ -70,7 +70,7 @@ class Output:
             .. code-block:: python
 
                 out.error("Connection failed")
-                [-] Connection failed  # (in red)
+                # Output: [-] Connection failed  (in red)
         """
         print(f"{Fore.RED}[-] {msg}{Style.RESET_ALL}")
 
@@ -86,7 +86,7 @@ class Output:
             .. code-block:: python
 
                 out.info("Starting exploit")
-                [*] Starting exploit  # (in blue)
+                # Output: [*] Starting exploit  (in blue)
         """
         print(f"{Fore.BLUE}[*] {msg}{Style.RESET_ALL}")
 
@@ -102,7 +102,7 @@ class Output:
             .. code-block:: python
 
                 out.warning("Using default credentials")
-                [!] Using default credentials  # (in yellow)
+                # Output: [!] Using default credentials  (in yellow)
         """
         print(f"{Fore.YELLOW}[!] {msg}{Style.RESET_ALL}")
 
@@ -121,8 +121,8 @@ class Output:
 
                 Output.set_verbose(True)
                 out.debug("Response: 200 OK")
-                [DEBUG] Response: 200 OK  # (in magenta)
-                
+                # Output: [DEBUG] Response: 200 OK  (in magenta)
+
                 Output.set_verbose(False)
                 out.debug("This won't print")
                 # (no output)
@@ -142,7 +142,7 @@ class Output:
             .. code-block:: python
 
                 out.status("Extracting data...")
-                [...] Extracting data...  # (in cyan)
+                # Output: [...] Extracting data...  (in cyan)
         """
         print(f"{Fore.CYAN}[...] {msg}{Style.RESET_ALL}")
 
@@ -159,9 +159,10 @@ class Output:
             .. code-block:: python
 
                 out.raw("Plain text")
-                Plain text
+                # Output: Plain text
+
                 out.raw("Colored text", Fore.MAGENTA)
-                Colored text  # (in magenta)
+                # Output: Colored text  (in magenta)
         """
         if color:
             print(f"{color}{msg}{Style.RESET_ALL}")
