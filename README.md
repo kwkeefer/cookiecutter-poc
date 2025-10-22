@@ -18,7 +18,6 @@ uv run your_project --help
 
 ## Features
 
-- **KISS principle** - Keep It Simple, Stupid
 - **Built-in HTTP server** - Log callbacks and serve payloads
 - **Utility modules** - Encoding, shells, XSS, file uploads, and more
 - **Ready-to-use payloads** - Webshells, XSS, reverse shells
