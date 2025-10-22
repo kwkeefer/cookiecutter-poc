@@ -1,7 +1,17 @@
 #!/usr/bin/env python3
 """
 Simple HTTP server for POC development.
-Serves payloads and logs all requests.
+
+This module provides a lightweight HTTP server that:
+- Serves files from the payloads/ directory
+- Logs all incoming requests to logs/server.ndjson
+- Automatically captures cookies and exfiltrated data
+- Provides an event queue accessible via HTTP DELETE /queue
+
+The server supports both query parameters and path parameters for
+cookie and exfil data capture:
+- Query: /?cookie=data or /?exfil=data
+- Path: /cookie/data or /exfil/data
 """
 
 from http.server import SimpleHTTPRequestHandler, HTTPServer
@@ -28,9 +38,23 @@ event_queue = Queue()
 
 
 class POCHTTPHandler(SimpleHTTPRequestHandler):
-    """HTTP handler that serves payloads and logs everything"""
+    """
+    HTTP request handler for POC development.
+
+    Extends SimpleHTTPRequestHandler to add:
+    - Automatic request logging
+    - Cookie capture from query params or path
+    - Exfil data capture from query params or path
+    - Event queue for interesting captures
+    - CORS support for XSS callbacks
+    """
 
     def __init__(self, *args, **kwargs):
+        """
+        Initialize the handler.
+
+        Automatically sets the serving directory to payloads/.
+        """
         # Serve from payloads directory
         super().__init__(*args, directory=str(PAYLOADS_DIR), **kwargs)
 
@@ -39,6 +63,12 @@ class POCHTTPHandler(SimpleHTTPRequestHandler):
         super().do_GET()
 
     def do_POST(self):
+        """
+        Handle POST requests.
+
+        Logs the request and body, then sends a JSON response
+        confirming the data was received.
+        """
         self.handle_request()
 
         # Read POST data
@@ -67,7 +97,16 @@ class POCHTTPHandler(SimpleHTTPRequestHandler):
         self.end_headers()
 
     def do_DELETE(self):
-        """DELETE /queue - get next item from queue"""
+        """
+        Handle DELETE requests for event queue.
+
+        DELETE /queue pops and returns the next event from the queue.
+        Returns 200 with JSON event data if available, 204 if queue is empty.
+
+        Returns:
+            JSON with event data: {"type": "cookie", "data": "...", "timestamp": "..."}
+            Or 204 No Content if queue is empty
+        """
         if self.path == '/queue':
             try:
                 event = event_queue.get(timeout=1.0)
@@ -83,7 +122,21 @@ class POCHTTPHandler(SimpleHTTPRequestHandler):
             self.end_headers()
 
     def handle_request(self):
-        """Log request details"""
+        """
+        Log request details and capture interesting data.
+
+        Logs all request details to logs/server.ndjson and checks for:
+        - Cookies in query (?cookie=) or path (/cookie/)
+        - Exfil data in query (?exfil=) or path (/exfil/)
+
+        Captured cookies and exfil data are:
+        - Displayed in console with colored output
+        - Added to the event queue (accessible via DELETE /queue)
+        - Logged to server.ndjson
+
+        Cookie data is automatically base64-decoded if possible.
+        Path parameters are URL-decoded automatically.
+        """
         parsed = urlparse(self.path)
 
         # Read body if POST
@@ -165,7 +218,21 @@ class POCHTTPHandler(SimpleHTTPRequestHandler):
 
 
 def main_with_args(args):
-    """Main entry point called from CLI"""
+    """
+    Main entry point called from CLI.
+
+    Starts the HTTP server on the specified host and port.
+    Displays all available network interfaces and their IPs.
+
+    Args:
+        args: Namespace with bind (str) and port (int) attributes
+
+    The server will:
+    - Serve files from payloads/ directory
+    - Log all requests to logs/server.ndjson
+    - Capture cookies and exfil data automatically
+    - Provide event queue at DELETE /queue
+    """
     os.chdir(str(PAYLOADS_DIR))  # Serve from payloads directory
 
     # Queue is now accessed via HTTP DELETE /queue endpoint
