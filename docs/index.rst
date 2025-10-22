@@ -1,7 +1,9 @@
 cookiecutter-poc
 ================
 
-A minimal `cookiecutter <https://cookiecutter.readthedocs.io/en/stable/README.html>`_ template for quickly creating lean, fast Proof-of-Concept projects for security research and exploitation development.
+A minimal `cookiecutter <https://cookiecutter.readthedocs.io/en/stable/README.html>`_ template for rapidly scaffolding Proof-of-Concept projects in security research and exploit development.
+
+**Focus on hacking, not boilerplate code.**
 
 .. toctree::
    :maxdepth: 2
