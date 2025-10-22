@@ -33,7 +33,7 @@ class Output:
         Args:
             enabled: True to show debug messages, False to hide them
 
-        Example:
+        Examples:
             >>> from utils.output import Output
             >>> Output.set_verbose(True)
             >>> out.debug("This will now be visible")
@@ -48,7 +48,7 @@ class Output:
         Args:
             msg: Message to display
 
-        Example:
+        Examples:
             >>> out.success("Target is vulnerable!")
             [+] Target is vulnerable!  # (in green)
         """
@@ -62,7 +62,7 @@ class Output:
         Args:
             msg: Error message to display
 
-        Example:
+        Examples:
             >>> out.error("Connection failed")
             [-] Connection failed  # (in red)
         """
@@ -76,7 +76,7 @@ class Output:
         Args:
             msg: Info message to display
 
-        Example:
+        Examples:
             >>> out.info("Starting exploit")
             [*] Starting exploit  # (in blue)
         """
@@ -90,7 +90,7 @@ class Output:
         Args:
             msg: Warning message to display
 
-        Example:
+        Examples:
             >>> out.warning("Using default credentials")
             [!] Using default credentials  # (in yellow)
         """
@@ -106,7 +106,7 @@ class Output:
         Args:
             msg: Debug message to display
 
-        Example:
+        Examples:
             >>> Output.set_verbose(True)
             >>> out.debug("Response: 200 OK")
             [DEBUG] Response: 200 OK  # (in magenta)
@@ -126,7 +126,7 @@ class Output:
         Args:
             msg: Status message to display
 
-        Example:
+        Examples:
             >>> out.status("Extracting data...")
             [...] Extracting data...  # (in cyan)
         """
@@ -141,7 +141,7 @@ class Output:
             msg: Message to print
             color: Optional colorama color (e.g., Fore.RED)
 
-        Example:
+        Examples:
             >>> out.raw("Plain text")
             Plain text
             >>> out.raw("Colored text", Fore.MAGENTA)

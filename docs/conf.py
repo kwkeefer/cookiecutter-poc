@@ -45,6 +45,15 @@ napoleon_preprocess_types = False
 napoleon_type_aliases = None
 napoleon_attr_annotations = True
 
+# Autodoc settings
+autodoc_default_options = {
+    'members': True,
+    'undoc-members': True,
+    'show-inheritance': True,
+}
+# Preserve type hints
+autodoc_typehints = 'description'
+
 # Autosummary settings
 autosummary_generate = True
 

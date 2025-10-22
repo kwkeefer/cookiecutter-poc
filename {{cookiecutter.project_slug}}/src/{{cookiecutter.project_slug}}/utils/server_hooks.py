@@ -55,7 +55,7 @@ def wait_for_callback(server='http://localhost:8000', timeout=30, param='cookie'
     """
     Wait for a specific callback type to arrive.
 
-    Example:
+    Examples:
         # Send XSS payload
         send_payload(xss)
 

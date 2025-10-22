@@ -69,7 +69,7 @@ async def batch_request(
     Returns:
         List of BatchResult objects (only matched if filter_matched=True)
 
-    Example:
+    Examples:
         # Build base request with all common parameters
         client = httpx.Client()
         base = client.build_request(
@@ -196,7 +196,7 @@ def batch_request_sync(
     """
     Synchronous wrapper for batch_request.
 
-    Example:
+    Examples:
         client = httpx.Client()
         base = client.build_request(
             "POST",
@@ -238,7 +238,7 @@ def generate_param_payloads(name: str, values: List[Any], base_params: Optional[
     """
     Generate payloads for testing different URL parameter values.
 
-    Example:
+    Examples:
         client = httpx.Client()
         base = client.build_request("GET", "http://target/api", params={"page": 1})
 
@@ -253,7 +253,7 @@ def generate_json_payloads(field: str, values: List[Any], base_json: Optional[Di
     """
     Generate payloads for testing different JSON field values.
 
-    Example:
+    Examples:
         payloads = generate_json_payloads("username", ["admin", "root", "test"])
         payloads = generate_json_payloads("role", ["user", "admin"], base_json={"active": True})
     """
@@ -265,7 +265,7 @@ def generate_data_payloads(field: str, values: List[Any], base_data: Optional[Di
     """
     Generate payloads for testing different form data values.
 
-    Example:
+    Examples:
         payloads = generate_data_payloads("password", ["admin", "password", "123456"])
         payloads = generate_data_payloads("user", sqli_payloads, base_data={"pass": "test"})
     """
@@ -277,7 +277,7 @@ def generate_header_payloads(header: str, values: List[Any], base_headers: Optio
     """
     Generate payloads for testing different header values.
 
-    Example:
+    Examples:
         payloads = generate_header_payloads("X-Forwarded-For", ["127.0.0.1", "localhost", "192.168.1.1"])
         payloads = generate_header_payloads("Authorization", [f"Bearer {token}" for token in tokens])
     """
@@ -289,7 +289,7 @@ def generate_cookie_payloads(name: str, values: List[Any], base_cookies: Optiona
     """
     Generate payloads for testing different cookie values.
 
-    Example:
+    Examples:
         payloads = generate_cookie_payloads("session", ["admin", "guest", "' OR '1'='1"])
     """
     base_cookies = base_cookies or {}
@@ -300,7 +300,7 @@ def generate_method_payloads(methods: List[str]) -> List[Dict]:
     """
     Generate payloads for testing different HTTP methods.
 
-    Example:
+    Examples:
         payloads = generate_method_payloads(["GET", "POST", "PUT", "DELETE", "OPTIONS"])
         results = batch_request_sync(
             base,
@@ -315,7 +315,7 @@ def generate_path_payloads(paths: List[str], base_url: Optional[str] = None) -> 
     """
     Generate payloads for testing different URL paths.
 
-    Example:
+    Examples:
         # Test different API endpoints
         payloads = generate_path_payloads([
             "/api/v1/users",
@@ -339,7 +339,7 @@ def generate_multi_payloads(payloads_dict: Dict[str, List[Any]], base_kwargs: Op
     """
     Generate payloads for multiple positions (like Burp Pitchfork).
 
-    Example:
+    Examples:
         payloads = generate_multi_payloads({
             "data": [{"user": "admin", "pass": "admin"}, {"user": "root", "pass": "root"}],
             "headers": [{"X-Token": "abc"}, {"X-Token": "xyz"}]

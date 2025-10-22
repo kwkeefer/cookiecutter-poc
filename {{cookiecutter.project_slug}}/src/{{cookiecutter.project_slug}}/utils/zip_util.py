@@ -6,7 +6,7 @@ Quick and dirty functions for zipping files and folders.
 Note: All functions return Path objects (from pathlib).
       - Path objects work directly with most APIs expecting strings
       - To convert to string: str(zip_path)
-      - Example: zip_path = zip_file('test.txt')  # Returns Path
+      - Examples: zip_path = zip_file('test.txt')  # Returns Path
                  path_str = str(zip_path)         # Convert to string
 """
 
@@ -29,7 +29,7 @@ def zip_file(file_path, output_path=None, name_in_zip=None):
     Returns:
         Path to the created zip file
 
-    Example:
+    Examples:
         zip_file('/etc/passwd', 'stolen_passwd.zip')
         zip_file('../secret.txt')  # Creates secret.zip in current dir
 
@@ -82,7 +82,7 @@ def zip_folder(folder_path, output_path=None):
     Returns:
         Path to the created zip file
 
-    Example:
+    Examples:
         zip_folder('/home/user/documents', 'exfil_docs.zip')
         zip_folder('../sensitive_data/')  # Creates sensitive_data.zip
     """
@@ -134,7 +134,7 @@ def quick_zip(path, output=None):
     Returns:
         Path to created zip file or None
 
-    Example:
+    Examples:
         quick_zip('/etc/passwd')
         quick_zip('../important_stuff/')
     """
@@ -164,7 +164,7 @@ def zip_multiple(paths, output_path="archive.zip", names_in_zip=None):
     Returns:
         Path to created zip file or None
 
-    Example:
+    Examples:
         # Normal usage
         zip_multiple(['/etc/passwd', '/etc/shadow'], 'exfil.zip')
 
@@ -230,7 +230,7 @@ def extract_zip(zip_path, extract_to=None):
     Returns:
         Path to extraction directory or None
 
-    Example:
+    Examples:
         extract_zip('data.zip')
         extract_zip('archive.zip', '/tmp/extracted/')
     """

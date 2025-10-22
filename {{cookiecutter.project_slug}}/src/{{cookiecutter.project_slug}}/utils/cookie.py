@@ -19,7 +19,7 @@ def parse_cookie_string(cookie_string):
     Returns:
         dict: Dictionary of cookie names to values
 
-    Example:
+    Examples:
         >>> cookie_str = "token=abc123; username=admin; session=xyz"
         >>> cookies = parse_cookie_string(cookie_str)
         >>> cookies
@@ -54,7 +54,7 @@ def cookie_string_to_header(cookie_string):
     Returns:
         str: Clean cookie string suitable for Cookie header
 
-    Example:
+    Examples:
         >>> cookie_str = "token=abc123; username=admin"
         >>> header = cookie_string_to_header(cookie_str)
         >>> header

