@@ -36,7 +36,6 @@ def zip_file(file_path, output_path=None, name_in_zip=None):
         >>> # Zip slip - file extracts to ../../../evil.sh
         >>> zip_file('payload.sh', 'malicious.zip', name_in_zip='../../../evil.sh')
     """
-    """
     file_path = Path(file_path)
 
     if not file_path.exists():
@@ -86,7 +85,6 @@ def zip_folder(folder_path, output_path=None):
     Examples:
         ... zip_folder('/home/user/documents', 'exfil_docs.zip')
         >>> zip_folder('../sensitive_data/')  # Creates sensitive_data.zip
-    """
     """
     folder_path = Path(folder_path)
 
@@ -140,7 +138,6 @@ def quick_zip(path, output=None):
         ... quick_zip('/etc/passwd')
         >>> quick_zip('../important_stuff/')
     """
-    """
     path = Path(path)
 
     if path.is_file():
@@ -177,7 +174,6 @@ def zip_multiple(paths, output_path="archive.zip", names_in_zip=None):
         ...     'malicious.zip',
         ...     names_in_zip=['../../../var/www/shell.php', '../../../../etc/cron.d/backdoor']
         >>> )
-    """
     """
     output_path = Path(output_path)
 
@@ -237,7 +233,6 @@ def extract_zip(zip_path, extract_to=None):
     Examples:
         ... extract_zip('data.zip')
         >>> extract_zip('archive.zip', '/tmp/extracted/')
-    """
     """
     zip_path = Path(zip_path)
 

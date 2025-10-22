@@ -92,7 +92,6 @@ async def batch_request(
         ...     drop_response=True  # Save memory for large scans
         >>> )
     """
-    """
     semaphore = asyncio.Semaphore(concurrency)
     results = []
     cancel_event = asyncio.Event()
@@ -212,7 +211,6 @@ def batch_request_sync(
         ...     proxy="http://127.0.0.1:8080"  # Optional: route through Burp
         >>> )
     """
-    """
     import asyncio
 
     return asyncio.run(batch_request(base_request, payloads, validate, **kwargs))
@@ -247,7 +245,6 @@ def generate_param_payloads(name: str, values: List[Any], base_params: Optional[
         >>> payloads = generate_param_payloads("id", range(1, 100))
         >>> results = batch_request_sync(base, payloads, validate=lambda r: r.status_code == 200)
     """
-    """
     base_params = base_params or {}
     return [{"params": {**base_params, name: v}} for v in values]
 
@@ -259,7 +256,6 @@ def generate_json_payloads(field: str, values: List[Any], base_json: Optional[Di
     Examples:
         ... payloads = generate_json_payloads("username", ["admin", "root", "test"])
         >>> payloads = generate_json_payloads("role", ["user", "admin"], base_json={"active": True})
-    """
     """
     base_json = base_json or {}
     return [{"json": {**base_json, field: v}} for v in values]
@@ -273,7 +269,6 @@ def generate_data_payloads(field: str, values: List[Any], base_data: Optional[Di
         ... payloads = generate_data_payloads("password", ["admin", "password", "123456"])
         >>> payloads = generate_data_payloads("user", sqli_payloads, base_data={"pass": "test"})
     """
-    """
     base_data = base_data or {}
     return [{"data": {**base_data, field: v}} for v in values]
 
@@ -286,7 +281,6 @@ def generate_header_payloads(header: str, values: List[Any], base_headers: Optio
         ... payloads = generate_header_payloads("X-Forwarded-For", ["127.0.0.1", "localhost", "192.168.1.1"])
         >>> payloads = generate_header_payloads("Authorization", [f"Bearer {token}" for token in tokens])
     """
-    """
     base_headers = base_headers or {}
     return [{"headers": {**base_headers, header: str(v)}} for v in values]
 
@@ -297,7 +291,6 @@ def generate_cookie_payloads(name: str, values: List[Any], base_cookies: Optiona
 
     Examples:
         ... payloads = generate_cookie_payloads("session", ["admin", "guest", "' OR '1'='1"])
-    """
     """
     base_cookies = base_cookies or {}
     return [{"cookies": {**base_cookies, name: str(v)}} for v in values]
@@ -314,7 +307,6 @@ def generate_method_payloads(methods: List[str]) -> List[Dict]:
         ...     payloads=payloads,
         ...     validate=lambda r: r.status_code != 405
         >>> )
-    """
     """
     return [{"method": method} for method in methods]
 
@@ -338,7 +330,6 @@ def generate_path_payloads(paths: List[str], base_url: Optional[str] = None) -> 
         ...     base_url="http://target/api/users/"
         >>> )
     """
-    """
     if base_url:
         return [{"url": base_url.rstrip("/") + "/" + path.lstrip("/")} for path in paths]
     return [{"url": path} for path in paths]
@@ -353,7 +344,6 @@ def generate_multi_payloads(payloads_dict: Dict[str, List[Any]], base_kwargs: Op
         ...     "data": [{"user": "admin", "pass": "admin"}, {"user": "root", "pass": "root"}],
         ...     "headers": [{"X-Token": "abc"}, {"X-Token": "xyz"}]
         >>> })
-    """
     """
     base_kwargs = base_kwargs or {}
 

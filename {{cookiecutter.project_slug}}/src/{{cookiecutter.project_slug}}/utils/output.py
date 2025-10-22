@@ -38,7 +38,6 @@ class Output:
             >>> Output.set_verbose(True)
             >>> out.debug("This will now be visible")
         """
-        """
         cls.verbose = enabled
 
     @staticmethod
@@ -52,7 +51,6 @@ class Output:
         Examples:
             >>> out.success("Target is vulnerable!")
             >>> [+] Target is vulnerable!  # (in green)
-        """
         """
         print(f"{Fore.GREEN}[+] {msg}{Style.RESET_ALL}")
 
@@ -68,7 +66,6 @@ class Output:
             >>> out.error("Connection failed")
             >>> [-] Connection failed  # (in red)
         """
-        """
         print(f"{Fore.RED}[-] {msg}{Style.RESET_ALL}")
 
     @staticmethod
@@ -83,7 +80,6 @@ class Output:
             >>> out.info("Starting exploit")
             >>> [*] Starting exploit  # (in blue)
         """
-        """
         print(f"{Fore.BLUE}[*] {msg}{Style.RESET_ALL}")
 
     @staticmethod
@@ -97,7 +93,6 @@ class Output:
         Examples:
             >>> out.warning("Using default credentials")
             >>> [!] Using default credentials  # (in yellow)
-        """
         """
         print(f"{Fore.YELLOW}[!] {msg}{Style.RESET_ALL}")
 
@@ -120,7 +115,6 @@ class Output:
             >>> out.debug("This won't print")
             >>> # (no output)
         """
-        """
         if Output.verbose:
             print(f"{Fore.MAGENTA}[DEBUG] {msg}{Style.RESET_ALL}")
 
@@ -135,7 +129,6 @@ class Output:
         Examples:
             >>> out.status("Extracting data...")
             >>> [...] Extracting data...  # (in cyan)
-        """
         """
         print(f"{Fore.CYAN}[...] {msg}{Style.RESET_ALL}")
 
@@ -153,7 +146,6 @@ class Output:
             >>> Plain text
             >>> out.raw("Colored text", Fore.MAGENTA)
             >>> Colored text  # (in magenta)
-        """
         """
         if color:
             print(f"{color}{msg}{Style.RESET_ALL}")

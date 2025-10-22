@@ -33,7 +33,6 @@ def run(cmd, timeout=30, input_data=None):
         >>> else:
         ...     print(f"Failed: {stderr}")
     """
-    """
     if isinstance(cmd, str):
         cmd = shlex.split(cmd)
 

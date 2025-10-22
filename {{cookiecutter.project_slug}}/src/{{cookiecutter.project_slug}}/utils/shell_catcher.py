@@ -36,7 +36,6 @@ class ShellCatcher:
         >>> if catcher.wait_for_shell(timeout=10):
         ...     catcher.interact()
     """
-    """
 
     def __init__(self, port, host="0.0.0.0"):
         self.host = host
@@ -373,7 +372,6 @@ def quick_catch(port=4444, trigger_func=None, trigger_delay=1):
 
         >>> quick_catch(4444, trigger_func=trigger)
     """
-    """
     catcher = ShellCatcher(port)
     catcher.start()
 
@@ -404,7 +402,6 @@ def auto_shell(port=4444, wait_timeout=30):
         ...     if catcher.shell_caught:
         ...         catcher.send_command("id")
         ...         catcher.interact()
-    """
     """
 
     class ShellContext:

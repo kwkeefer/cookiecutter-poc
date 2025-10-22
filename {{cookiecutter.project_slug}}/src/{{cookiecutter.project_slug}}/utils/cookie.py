@@ -28,7 +28,6 @@ def parse_cookie_string(cookie_string):
         >>> # Use with requests:
         >>> response = requests.get(url, cookies=cookies)
     """
-    """
     if not cookie_string:
         return {}
 
@@ -64,7 +63,6 @@ def cookie_string_to_header(cookie_string):
         >>> # Use with requests:
         >>> headers = {'Cookie': header}
         >>> response = requests.get(url, headers=headers)
-    """
     """
     # Parse and reconstruct to ensure clean formatting
     cookies = parse_cookie_string(cookie_string)
