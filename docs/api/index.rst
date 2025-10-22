@@ -17,7 +17,7 @@ The POC template includes a comprehensive set of utilities organized into module
 * **Output** - Colored console output for better visibility
 * **Reverse Shells** - Generate and catch reverse shells
 * **Cookie Handling** - Parse and manage stolen cookies
-* **Server Hooks** - Get data from callback servers
+* **Server Hooks** - Get data from HTTP callback servers
 * **XSS Payloads** - Generate XSS payloads with callbacks
 * **XXE Payloads** - XML External Entity exploitation helpers
 * **File Upload** - Upload files with bypass techniques

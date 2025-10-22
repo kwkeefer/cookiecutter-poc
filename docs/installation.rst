@@ -92,7 +92,7 @@ No setup needed! Just run it:
    # Run the CLI
    uv run your_project --help
 
-   # Start the callback server
+   # Start the HTTP callback server
    uv run your_project --server
 
    # Run against a target

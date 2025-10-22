@@ -35,9 +35,8 @@ def main():
         print("\n[+] uv is installed")
         print("\nNext steps:")
         print("1. cd {{ cookiecutter.project_slug }}")
-        print("2. make dev                    # Install dependencies")
-        print("3. uv run {{ cookiecutter.project_slug }} --server   # Start callback server")
-        print("4. uv run {{ cookiecutter.project_slug }} -t TARGET  # Run exploit")
+        print("2. uv run {{ cookiecutter.project_slug }} --server   # Start HTTP callback server")
+        print("3. uv run {{ cookiecutter.project_slug }} -t TARGET  # Run exploit")
     else:
         print("\n⚠ uv is not installed")
         print("\nInstall uv:")

@@ -95,7 +95,7 @@ Edit ``src/your_project/exploit.py``:
 Run Your Exploit
 ----------------
 
-In one terminal, start the callback server:
+In one terminal, start the HTTP callback server:
 
 .. code-block:: bash
 

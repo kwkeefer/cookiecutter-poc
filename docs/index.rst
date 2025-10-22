@@ -11,6 +11,7 @@ The goal is **speed and simplicity** - get a working POC fast without unnecessar
 
    installation
    quickstart
+   payloads
    examples
    workflows
    api/index
@@ -40,7 +41,7 @@ Inside your generated project:
 
    cd your_project
    uv run your_project --help       # Run the POC CLI
-   uv run your_project --server     # Start callback server
+   uv run your_project --server     # Start HTTP callback server
 
 Philosophy
 ----------
