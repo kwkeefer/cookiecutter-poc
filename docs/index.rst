@@ -11,6 +11,7 @@ A `cookiecutter <https://cookiecutter.readthedocs.io/en/stable/README.html>`_ te
 
    installation
    quickstart
+   http-server
    payloads
    examples
    workflows
@@ -21,7 +22,7 @@ Features
 
 * **Quick POC Creation** - Generate new projects in seconds
 * **Built-in Utilities** - Common exploit patterns
-* **HTTP Servers** - Log callbacks, serve payloads
+* **HTTP Callback Server** - Event queue, automatic data capture, payload serving
 * **Reverse Shell Management** - Generate and catch shells directly in Python
 * **XSS & XXE Helpers** - Pre-built payload generators
 
