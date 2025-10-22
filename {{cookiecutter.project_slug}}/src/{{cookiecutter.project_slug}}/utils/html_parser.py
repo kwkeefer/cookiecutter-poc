@@ -1,12 +1,8 @@
 """HTML parsing utility for extracting data from web responses.
 
-**End-to-End Example:**
+**Example:**
 
 .. code-block:: python
-
-    import requests
-    from your_project.utils.html_parser import HTMLParser
-    from your_project.utils.output import out
 
     # Make a request to target
     response = requests.get("http://target.com/login")
@@ -19,38 +15,6 @@
     if csrf_token:
         out.success(f"Found CSRF token: {csrf_token}")
 
-    # Find and extract login form data
-    forms = parser.find_forms()
-    if forms:
-        login_form = forms[0]  # First form on page
-        form_data = parser.extract_form_data(login_form)
-
-        # Update with our credentials
-        form_data['username'] = 'admin'
-        form_data['password'] = 'password'
-        form_data['csrf_token'] = csrf_token  # Include CSRF token
-
-        # Get form action URL
-        action = login_form.get('action', '/login')
-        method = login_form.get('method', 'POST')
-
-        # Submit the form
-        if method.upper() == 'POST':
-            resp = requests.post(f"http://target.com{action}", data=form_data)
-        else:
-            resp = requests.get(f"http://target.com{action}", params=form_data)
-
-    # Search for specific elements
-    error_msg = parser.find_by_class('error-message')
-    if error_msg:
-        out.error(f"Login failed: {error_msg.text}")
-
-    # Extract all links for crawling
-    links = parser.find_links()
-    for link in links:
-        href = link.get('href')
-        if href and href.startswith('/admin'):
-            out.info(f"Found admin link: {href}")
 """
 
 from bs4 import BeautifulSoup
