@@ -1,6 +1,6 @@
 # cookiecutter-poc
 
-A minimal Python cookiecutter template for quickly creating Proof of Concept (POC) exploits and security tools. Built for speed and simplicity - no unnecessary complexity.
+A minimal Python [cookiecutter](https://cookiecutter.readthedocs.io/en/stable/README.html) template for quickly creating Proof of Concept (POC) exploits and security tools. Built for speed and simplicity - no unnecessary complexity.
 
 ## Quick Start
 
