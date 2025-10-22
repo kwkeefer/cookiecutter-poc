@@ -34,9 +34,11 @@ class Output:
             enabled: True to show debug messages, False to hide them
 
         Examples:
-            >>> from utils.output import Output
-            >>> Output.set_verbose(True)
-            >>> out.debug("This will now be visible")
+            .. code-block:: python
+
+                from utils.output import Output
+                Output.set_verbose(True)
+                out.debug("This will now be visible")
         """
         cls.verbose = enabled
 
@@ -49,8 +51,10 @@ class Output:
             msg: Message to display
 
         Examples:
-            >>> out.success("Target is vulnerable!")
-            >>> [+] Target is vulnerable!  # (in green)
+            .. code-block:: python
+
+                out.success("Target is vulnerable!")
+                [+] Target is vulnerable!  # (in green)
         """
         print(f"{Fore.GREEN}[+] {msg}{Style.RESET_ALL}")
 
@@ -63,8 +67,10 @@ class Output:
             msg: Error message to display
 
         Examples:
-            >>> out.error("Connection failed")
-            >>> [-] Connection failed  # (in red)
+            .. code-block:: python
+
+                out.error("Connection failed")
+                [-] Connection failed  # (in red)
         """
         print(f"{Fore.RED}[-] {msg}{Style.RESET_ALL}")
 
@@ -77,8 +83,10 @@ class Output:
             msg: Info message to display
 
         Examples:
-            >>> out.info("Starting exploit")
-            >>> [*] Starting exploit  # (in blue)
+            .. code-block:: python
+
+                out.info("Starting exploit")
+                [*] Starting exploit  # (in blue)
         """
         print(f"{Fore.BLUE}[*] {msg}{Style.RESET_ALL}")
 
@@ -91,8 +99,10 @@ class Output:
             msg: Warning message to display
 
         Examples:
-            >>> out.warning("Using default credentials")
-            >>> [!] Using default credentials  # (in yellow)
+            .. code-block:: python
+
+                out.warning("Using default credentials")
+                [!] Using default credentials  # (in yellow)
         """
         print(f"{Fore.YELLOW}[!] {msg}{Style.RESET_ALL}")
 
@@ -107,13 +117,15 @@ class Output:
             msg: Debug message to display
 
         Examples:
-            >>> Output.set_verbose(True)
-            >>> out.debug("Response: 200 OK")
-            >>> [DEBUG] Response: 200 OK  # (in magenta)
-            >>>
-            >>> Output.set_verbose(False)
-            >>> out.debug("This won't print")
-            >>> # (no output)
+            .. code-block:: python
+
+                Output.set_verbose(True)
+                out.debug("Response: 200 OK")
+                [DEBUG] Response: 200 OK  # (in magenta)
+                
+                Output.set_verbose(False)
+                out.debug("This won't print")
+                # (no output)
         """
         if Output.verbose:
             print(f"{Fore.MAGENTA}[DEBUG] {msg}{Style.RESET_ALL}")
@@ -127,8 +139,10 @@ class Output:
             msg: Status message to display
 
         Examples:
-            >>> out.status("Extracting data...")
-            >>> [...] Extracting data...  # (in cyan)
+            .. code-block:: python
+
+                out.status("Extracting data...")
+                [...] Extracting data...  # (in cyan)
         """
         print(f"{Fore.CYAN}[...] {msg}{Style.RESET_ALL}")
 
@@ -142,10 +156,12 @@ class Output:
             color: Optional colorama color (e.g., Fore.RED)
 
         Examples:
-            >>> out.raw("Plain text")
-            >>> Plain text
-            >>> out.raw("Colored text", Fore.MAGENTA)
-            >>> Colored text  # (in magenta)
+            .. code-block:: python
+
+                out.raw("Plain text")
+                Plain text
+                out.raw("Colored text", Fore.MAGENTA)
+                Colored text  # (in magenta)
         """
         if color:
             print(f"{color}{msg}{Style.RESET_ALL}")

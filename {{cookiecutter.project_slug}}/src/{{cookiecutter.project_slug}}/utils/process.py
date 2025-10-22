@@ -17,21 +17,23 @@ def run(cmd, timeout=30, input_data=None):
         (stdout, stderr, returncode)
 
     Examples:
-        >>> # Run simple command
-        >>> stdout, stderr, code = run("echo 'test'")
+        .. code-block:: python
 
-        >>> # Run with arguments
-        >>> stdout, stderr, code = run(["./exploit", "target.com", "1337"])
-
-        >>> # Send input to stdin
-        >>> stdout, stderr, code = run("./vulnapp", input_data=payload)
-
-        >>> # Check success
-        >>> stdout, stderr, code = run("./exploit")
-        >>> if code == 0:
-        ...     print(f"Success: {stdout}")
-        >>> else:
-        ...     print(f"Failed: {stderr}")
+            # Run simple command
+            stdout, stderr, code = run("echo 'test'")
+            
+            # Run with arguments
+            stdout, stderr, code = run(["./exploit", "target.com", "1337"])
+            
+            # Send input to stdin
+            stdout, stderr, code = run("./vulnapp", input_data=payload)
+            
+            # Check success
+            stdout, stderr, code = run("./exploit")
+            if code == 0:
+                print(f"Success: {stdout}")
+            else:
+                print(f"Failed: {stderr}")
     """
     if isinstance(cmd, str):
         cmd = shlex.split(cmd)

