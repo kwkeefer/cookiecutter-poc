@@ -2,7 +2,10 @@
 Apache log parsing utilities for OSWE exam fallback.
 Use this when exam requires Apache2 instead of the built-in server.
 
-Parses Apache access.log for query parameters (cookies, exfil, etc.)
+Parses Apache access.log for both query and path parameters:
+- Query parameters: /?cookie=data or /?exfil=data
+- Path parameters: /cookie/data or /exfil/data
+
 Works similarly to server_hooks.py but reads from log files.
 """
 
@@ -20,7 +23,8 @@ def parse_apache_line(line: str) -> dict:
     Example line:
     ::1 - - [13/Oct/2025:13:20:01 -0700] "GET /?cookies=test HTTP/1.1" 200 3454 "-" "Mozilla/5.0..."
 
-    Returns dict with: timestamp, method, path, query_params, status
+    Returns dict with: timestamp, method, path, query_params, path_params, status
+    Also extracts path-based parameters like /cookie/data or /exfil/data
     """
     # Apache combined log format regex
     pattern = r'([^\s]+) - - \[([^\]]+)\] "(\w+) ([^\s]+) HTTP/[^"]+" (\d+) (\d+|-) "([^"]*)" "([^"]*)"'
@@ -39,12 +43,20 @@ def parse_apache_line(line: str) -> dict:
         path = full_path
         query_params = {}
 
+    # Check for path-based parameters (/cookie/data or /exfil/data)
+    path_params = {}
+    if path.startswith('/cookie/'):
+        path_params['cookie'] = [unquote(path[8:])]  # Remove '/cookie/' prefix and decode
+    elif path.startswith('/exfil/'):
+        path_params['exfil'] = [unquote(path[7:])]  # Remove '/exfil/' prefix and decode
+
     return {
         'ip': ip,
         'timestamp': timestamp,
         'method': method,
         'path': path,
         'query': query_params,
+        'path_params': path_params,
         'status': int(status),
         'size': int(size) if size != '-' else 0,
         'referer': referer,
@@ -75,12 +87,16 @@ def tail_log(log_file: str, start_pos: int = None) -> tuple:
 
 def find_param_in_logs(log_file: str, param_name: str, timeout: int = 30) -> str:
     """
-    Search Apache logs for a specific query parameter.
+    Search Apache logs for a specific parameter (query or path-based).
     Returns the MOST RECENT occurrence (last match in file).
+
+    Searches for both:
+    - Query parameters: ?param_name=value or &param_name=value
+    - Path parameters: /param_name/value
 
     Args:
         log_file: Path to Apache access.log
-        param_name: Query parameter to search for (e.g., 'cookies', 'exfil')
+        param_name: Parameter to search for (e.g., 'cookies', 'exfil', 'cookie')
         timeout: Max seconds to wait for log file to exist
 
     Returns:
@@ -99,14 +115,21 @@ def find_param_in_logs(log_file: str, param_name: str, timeout: int = 30) -> str
     with open(log_file, 'r') as f:
         content = f.read()
 
-    # Use regex to find all occurrences of the parameter
-    # Pattern: ?param_name=value or &param_name=value
-    pattern = rf'[?&]{re.escape(param_name)}=([^\s&"]+)'
-    matches = re.findall(pattern, content)
+    # Search for query parameters: ?param_name=value or &param_name=value
+    query_pattern = rf'[?&]{re.escape(param_name)}=([^\s&"]+)'
+    query_matches = re.findall(query_pattern, content)
 
-    if matches:
+    # Search for path parameters: /param_name/value
+    # Match: "GET /param_name/value HTTP or "POST /param_name/value HTTP
+    path_pattern = rf'"(?:GET|POST|PUT|DELETE) /{re.escape(param_name)}/([^\s"?]+)'
+    path_matches = re.findall(path_pattern, content)
+
+    # Combine all matches (query params come first in typical logs, so path params will be "more recent" if both exist)
+    all_matches = query_matches + path_matches
+
+    if all_matches:
         # Return the LAST occurrence (most recent)
-        return matches[-1]
+        return all_matches[-1]
 
     return None
 
@@ -114,7 +137,10 @@ def find_param_in_logs(log_file: str, param_name: str, timeout: int = 30) -> str
 def get_cookie(log_file: str = '/var/log/apache2/access.log', timeout: int = 30) -> str:
     """
     Get cookie value from Apache logs.
-    Looks for ?cookies=<value> or ?cookie=<value>
+
+    Supports both query and path parameters:
+    - Query: /?cookies=value or /?cookie=value
+    - Path: /cookie/value
 
     Args:
         log_file: Path to Apache access.log
@@ -144,7 +170,10 @@ def get_cookie(log_file: str = '/var/log/apache2/access.log', timeout: int = 30)
 def get_exfil(log_file: str = '/var/log/apache2/access.log', timeout: int = 30) -> str:
     """
     Get exfiltrated data from Apache logs.
-    Looks for ?exfil=<value>
+
+    Supports both query and path parameters:
+    - Query: /?exfil=value
+    - Path: /exfil/value
 
     Args:
         log_file: Path to Apache access.log
@@ -185,6 +214,10 @@ def watch_log(log_file: str = '/var/log/apache2/access.log', params: list = None
     """
     Watch Apache log in real-time and print interesting parameters.
 
+    Monitors for both query and path parameters:
+    - Query: /?param=value
+    - Path: /param/value
+
     Args:
         log_file: Path to Apache access.log
         params: List of parameters to watch for (default: ['cookies', 'cookie', 'exfil'])
@@ -215,7 +248,7 @@ def watch_log(log_file: str = '/var/log/apache2/access.log', params: list = None
                 if not parsed:
                     continue
 
-                # Check for interesting parameters
+                # Check for interesting parameters in query params
                 for param in params:
                     if param in parsed['query']:
                         value = parsed['query'][param][-1]  # Last value
@@ -223,9 +256,21 @@ def watch_log(log_file: str = '/var/log/apache2/access.log', params: list = None
                         # Try to decode if base64
                         try:
                             decoded = base64.b64decode(unquote(value)).decode('utf-8', errors='replace')
-                            print(f"[+] {param.upper()}: {decoded}")
+                            print(f"[+] {param.upper()} (query): {decoded}")
                         except:
-                            print(f"[+] {param.upper()}: {unquote(value)}")
+                            print(f"[+] {param.upper()} (query): {unquote(value)}")
+
+                # Check for interesting parameters in path params
+                for param in params:
+                    if param in parsed['path_params']:
+                        value = parsed['path_params'][param][0]  # First (and only) value
+
+                        # Try to decode if base64
+                        try:
+                            decoded = base64.b64decode(value).decode('utf-8', errors='replace')
+                            print(f"[+] {param.upper()} (path): {decoded}")
+                        except:
+                            print(f"[+] {param.upper()} (path): {value}")
 
             time.sleep(0.5)
 
@@ -245,10 +290,25 @@ if __name__ == "__main__":
         # Test mode
         print("Testing Apache log parser...")
 
-        # Test log line parsing
+        # Test query parameter parsing
+        print("\n1. Query parameter test:")
         test_line = '::1 - - [13/Oct/2025:13:20:01 -0700] "GET /?cookies=test123 HTTP/1.1" 200 3454 "-" "Mozilla/5.0"'
         parsed = parse_apache_line(test_line)
-        print(f"Parsed: {parsed}")
+        print(f"   Query params: {parsed['query']}")
+        print(f"   Path params: {parsed['path_params']}")
+
+        # Test path parameter parsing
+        print("\n2. Path parameter test:")
+        test_line2 = '::1 - - [13/Oct/2025:13:20:02 -0700] "GET /cookie/session%3Dabc123 HTTP/1.1" 200 100 "-" "curl/7.68.0"'
+        parsed2 = parse_apache_line(test_line2)
+        print(f"   Query params: {parsed2['query']}")
+        print(f"   Path params: {parsed2['path_params']}")
+
+        print("\n3. Exfil path parameter test:")
+        test_line3 = '::1 - - [13/Oct/2025:13:20:03 -0700] "GET /exfil/sensitive_data HTTP/1.1" 200 100 "-" "Python"'
+        parsed3 = parse_apache_line(test_line3)
+        print(f"   Query params: {parsed3['query']}")
+        print(f"   Path params: {parsed3['path_params']}")
 
         print("\nTo watch logs in real-time:")
         print("  python apache_hooks.py watch")
